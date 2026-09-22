@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Adaptparole — communiquer en GS avec la CAA</title>
+<style>
+:root{
+  --ink:#1E2B36; --ink2:#51616D; --paper:#EAF0F2; --panel:#FFFFFF; --line:#C8D3D9;
+  --accent:#2C6E8A; --accent-soft:#D6E8EF; --warn:#B4532A;
+  --k-pers:#F4D35E; --k-verbe:#86C77A; --k-desc:#83B7E6; --k-nom:#F3A65A;
+  --k-mot:#BFA2E8; --k-social:#F2A6C4; --k-quest:#AEB9C0; --k-prag:#FFFFFF;
+  --tile:124px;
+  --font: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.45;
+  display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* ---------- barre du haut ---------- */
+.top{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--panel);border-bottom:2px solid var(--line);flex-wrap:wrap}
+.brand{font-weight:800;font-size:1.15rem;display:flex;align-items:center;gap:8px;margin-right:auto}
+.brand .dots{display:inline-flex;gap:3px}
+.brand .dots i{width:10px;height:22px;border-radius:3px;display:block}
+.brand small{font-weight:600;color:var(--ink2);font-size:.9rem}
+.tbtn{padding:8px 14px;border-radius:12px;background:var(--paper);font-weight:700;font-size:.95rem;position:relative;overflow:hidden;border:2px solid transparent}
+.tbtn.on{background:var(--ink);color:#fff}
+.hold .fill{position:absolute;inset:0;background:var(--accent-soft);transform:scaleX(0);transform-origin:left;z-index:0}
+.hold span.lbl{position:relative;z-index:1}
+.hold.pressing .fill{transform:scaleX(1);transition:transform 1s linear}
+
+/* ---------- vue élève ---------- */
+#viewEleve{flex:1;display:flex;flex-direction:column;min-height:0}
+.strip-wrap{display:flex;gap:10px;padding:10px 12px;align-items:stretch}
+.strip{flex:1;min-height:92px;background:var(--panel);border:3px solid var(--ink);border-radius:18px;display:flex;align-items:center;gap:6px;padding:6px 10px;overflow-x:auto}
+.strip.model{border-style:dashed;border-color:var(--accent);background:#F4FAFC}
+.strip .empty{color:var(--ink2);font-size:.95rem;padding-left:6px}
+.strip .chip{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:70px;height:76px;border-radius:12px;padding:2px 6px;font-weight:700;font-size:.85rem;border-bottom:6px solid}
+.strip .chip .em{font-size:30px;line-height:1.1}
+.strip .chip img{width:40px;height:40px;object-fit:cover;border-radius:6px}
+.strip .said{margin-left:8px;font-size:1.25rem;font-weight:800;white-space:nowrap}
+.strip-btns{display:flex;gap:8px}
+.strip-btns button{width:78px;border-radius:18px;background:var(--panel);border:3px solid var(--line);font-size:1.6rem;font-weight:800}
+.strip-btns .say{width:110px;background:var(--ink);color:#fff;border-color:var(--ink);font-size:1.15rem}
+
+.board{flex:1;display:grid;grid-template-columns:118px 1fr 132px;gap:10px;padding:0 12px 12px;min-height:0}
+.ops{display:flex;flex-direction:column;gap:8px}
+.ops button{flex:1;max-height:110px;border-radius:16px;background:var(--panel);border:3px solid var(--ink);font-weight:800;font-size:.9rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px}
+.ops button .em{font-size:28px}
+.page{background:var(--panel);border-radius:20px;padding:10px 12px 12px;overflow:auto;border:2px solid var(--line);position:relative}
+.page h2{margin:0 0 8px;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+.page h2 i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tile),1fr));gap:10px}
+.tile{aspect-ratio:1/1;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:800;font-size:calc(var(--tile)*.13);text-align:center;padding:6px;border:2px solid rgba(0,0,0,.12);border-bottom-width:8px;position:relative;line-height:1.1}
+.tile .em{font-size:calc(var(--tile)*.42);line-height:1}
+.tile img{width:62%;height:62%;object-fit:cover;border-radius:10px}
+.tile .go{position:absolute;top:6px;right:8px;font-size:.8rem;opacity:.7}
+.tile:active,.tile.flash{transform:scale(.95)}
+.tile.prag{background:#fff;border:3px solid var(--ink);border-bottom-width:8px}
+.tabs{display:flex;flex-direction:column;gap:5px;overflow:auto}
+.tabs button{text-align:left;padding:8px 10px;border-radius:12px 0 0 12px;font-weight:800;font-size:.85rem;display:flex;align-items:center;gap:6px;border-left:8px solid;background:var(--panel);min-height:40px}
+.tabs button.cur{margin-left:-10px;box-shadow:inset 0 0 0 3px var(--ink)}
+
+/* couleurs de la clé */
+.c-pers{--k:var(--k-pers)} .c-verbe{--k:var(--k-verbe)} .c-desc{--k:var(--k-desc)} .c-nom{--k:var(--k-nom)}
+.c-mot{--k:var(--k-mot)} .c-social{--k:var(--k-social)} .c-quest{--k:var(--k-quest)} .c-prag{--k:var(--ink)}
+.tile[class*="c-"]:not(.prag){background:color-mix(in srgb,var(--k) 38%,#fff);border-bottom-color:var(--k)}
+.chip[class*="c-"]{background:color-mix(in srgb,var(--k) 38%,#fff);border-bottom-color:var(--k)}
+.chip.c-prag{background:#fff;border:2px solid var(--ink);border-bottom-width:6px}
+.tabs button[class*="c-"]{border-left-color:var(--k)}
+.modelmode .tile{box-shadow:0 0 0 3px var(--accent)}
+
+/* ---------- vue adulte ---------- */
+#viewAdulte{flex:1;display:grid;grid-template-columns:230px 1fr;min-height:0;-webkit-user-select:text;user-select:text}
+.anav{background:var(--panel);border-right:2px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:4px;overflow:auto}
+.anav button{text-align:left;padding:10px 12px;border-radius:12px;font-weight:700}
+.anav button.cur{background:var(--accent);color:#fff}
+.acontent{overflow:auto;padding:22px 26px 60px}
+.acontent h1{font-size:1.6rem;margin:0 0 6px;line-height:1.2}
+.acontent h2{font-size:1.2rem;margin:28px 0 8px}
+.acontent h3{font-size:1.02rem;margin:0 0 4px}
+.lead{color:var(--ink2);max-width:70ch;margin:0 0 14px}
+.prose{max-width:72ch}
+.box{background:var(--panel);border-radius:16px;padding:14px 16px;border:2px solid var(--line);margin:10px 0}
+.box.note{border-color:var(--warn);background:#FFF6F1}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.loop{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:12px 0 4px;max-width:900px}
+.loop div{background:var(--panel);border:2px solid var(--line);padding:12px;position:relative;font-size:.95rem}
+.loop div:first-child{border-radius:16px 0 0 16px}
+.loop div:last-child{border-radius:0 16px 16px 0}
+.loop div + div{border-left:0}
+.loop b{display:block;font-size:1.05rem;margin-bottom:2px}
+.loop .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:.85rem;margin-bottom:6px}
+.do{color:#2D6B2A;font-weight:700}
+.dont{color:var(--warn);font-weight:700}
+.ex{background:var(--paper);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:.95rem}
+.ex .c{color:var(--ink2)}
+table{border-collapse:collapse;width:100%;background:var(--panel);border-radius:14px;overflow:hidden;font-size:.95rem}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft)}
+tr.target td{background:#FFF8DD}
+.lvlbtn{padding:6px 12px;border-radius:10px;border:2px solid var(--line);font-weight:800;background:var(--panel)}
+.lvlbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn{padding:10px 16px;border-radius:12px;background:var(--accent);color:#fff;font-weight:800}
+.btn.sec{background:var(--panel);color:var(--ink);border:2px solid var(--line)}
+.btn.danger{background:var(--panel);color:var(--warn);border:2px solid var(--warn)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.moment{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+.moment .cnt{display:flex;align-items:center;gap:10px;margin:8px 0}
+.moment .cnt button{width:52px;height:52px;border-radius:14px;background:var(--paper);font-size:1.6rem;font-weight:800}
+.moment .cnt .v{font-size:1.8rem;font-weight:800;min-width:2ch;text-align:center}
+.bar{height:10px;background:var(--paper);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--k-verbe)}
+.moment ul{margin:6px 0 0;padding-left:18px;font-size:.92rem;color:var(--ink2)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:10px 12px}
+.stat b{display:block;font-size:1.7rem;line-height:1.1}
+.stat span{color:var(--ink2);font-size:.9rem}
+.week{display:flex;gap:8px;align-items:flex-end;height:130px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:10px}
+.week .d{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:.78rem;color:var(--ink2)}
+.week .d i{width:70%;background:var(--accent);border-radius:6px 6px 0 0;min-height:2px}
+.week .d b{color:var(--ink);font-size:.8rem}
+.selfcnt{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.selfcnt button{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:10px;text-align:left}
+.selfcnt button b{font-size:1.5rem;display:block}
+label.f{display:block;font-weight:700;margin:10px 0 4px}
+input[type=text],select{font:inherit;padding:9px 10px;border-radius:10px;border:2px solid var(--line);background:#fff;min-width:220px}
+.custlist{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.custlist .it{width:130px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center;font-weight:700;font-size:.9rem}
+.custlist img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px}
+.log{font-size:.92rem}
+.src li{margin-bottom:6px}
+
+/* ---------- panneau d'aide après une phrase ---------- */
+.sheet{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(760px,calc(100% - 20px));background:var(--panel);border:3px solid var(--accent);border-radius:20px;padding:14px 16px;box-shadow:0 10px 40px rgba(20,40,55,.25);z-index:20;max-height:80vh;overflow:auto;-webkit-user-select:text;user-select:text}
+.sheet h3{margin:0 0 6px;font-size:1rem;color:var(--accent)}
+.sheet .prod{font-size:1.2rem;font-weight:800}
+.sheet .resp{font-size:1.15rem;font-weight:800;margin:2px 0}
+.sheet .tip{color:var(--ink2);font-size:.92rem}
+.sheet .grp{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.pill{padding:7px 12px;border-radius:999px;border:2px solid var(--line);font-weight:700;font-size:.92rem;background:#fff}
+.pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sheet .speak{font-size:1rem;padding:2px 8px;border-radius:8px;background:var(--accent-soft);margin-left:6px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}
+
+/* ---------- attente ---------- */
+.overlay{position:fixed;inset:0;background:rgba(234,240,242,.94);z-index:30;display:grid;place-items:center;text-align:center}
+.ring{width:220px;height:220px;border-radius:50%;display:grid;place-items:center;font-size:4rem;font-weight:800;background:conic-gradient(var(--accent) var(--p,100%),#fff 0);margin:0 auto 14px}
+.ring span{width:180px;height:180px;border-radius:50%;background:var(--paper);display:grid;place-items:center}
+.overlay p{max-width:32ch;margin:0 auto 14px;font-size:1.1rem}
+.ai{display:inline-block;font-size:.78rem;font-weight:800;padding:2px 8px;border-radius:999px;background:#E7E0F7;color:#4B3A80;margin-left:6px;vertical-align:middle}
+.aiwait{color:var(--ink2);font-size:.9rem;font-style:italic}
+textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radius:12px;border:2px solid var(--line);min-height:70px}
+.synth{white-space:pre-wrap;max-width:72ch}
+#toast{position:fixed;top:14px;left:50%;transform:translate(-50%,-80px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;z-index:40;transition:transform .25s}
+#toast.show{transform:translate(-50%,0)}
+
+@media (max-width:820px){
+  .board{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+  .ops{flex-direction:row;overflow-x:auto}
+  .ops button{min-width:84px;max-height:none;height:70px;flex:0 0 auto}
+  .tabs{flex-direction:row;overflow-x:auto}
+  .tabs button{border-radius:12px;border-left-width:0;border-top:6px solid;border-top-color:var(--k);flex:0 0 auto}
+  .tabs button.cur{margin:0}
+  .strip-btns button{width:56px}.strip-btns .say{width:80px}
+  #viewAdulte{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .anav{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:2px solid var(--line)}
+  .anav button{flex:0 0 auto}
+  .loop{grid-template-columns:1fr 1fr}
+  .loop div{border-radius:0!important;border-left:2px solid var(--line)!important}
+  .sgrid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{
+  .top,.anav,#viewEleve,.noprint{display:none!important}
+  #viewAdulte{display:block!important}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="dots" aria-hidden="true"><i style="background:var(--k-pers)"></i><i style="background:var(--k-verbe)"></i><i style="background:var(--k-desc)"></i><i style="background:var(--k-nom)"></i></span>
+    Adaptparole <small id="who"></small>
+  </div>
+  <button class="tbtn" id="btnWait" title="Minuteur d'attente active">⏳ J'attends</button>
+  <button class="tbtn" id="btnOral" title="Noter une phrase dite à l'oral">💬 Il a dit…</button>
+  <button class="tbtn" id="btnModel" title="L'adulte montre les pictos en parlant">✋ Je modélise</button>
+  <button class="tbtn hold" id="btnAdult"><span class="fill"></span><span class="lbl">Espace adulte</span></button>
+  <button class="tbtn" id="btnBoard" hidden>← Tableau de l'élève</button>
+</header>
+
+<!-- ================= VUE ÉLÈVE ================= -->
+<section id="viewEleve">
+  <div class="strip-wrap">
+    <div id="strip" class="strip" aria-live="polite"></div>
+    <div class="strip-btns">
+      <button class="say" id="bSay">🔊 Dire</button>
+      <button id="bBack" aria-label="Effacer le dernier picto">⌫</button>
+      <button id="bClear" aria-label="Tout effacer">✕</button>
+    </div>
+  </div>
+  <div class="board">
+    <nav class="ops" aria-label="Boutons de conduite">
+      <button id="oHome"><span class="em">🏠</span>Début</button>
+      <button id="oPrev"><span class="em">↩️</span>Page d'avant</button>
+      <button id="oOups"><span class="em">🙊</span>Oups, erreur</button>
+      <button id="oNoWord"><span class="em">🤔</span>Pas le mot</button>
+      <button id="oOther"><span class="em">🔀</span>Autre chose</button>
+    </nav>
+    <div class="page" id="pageBox">
+      <h2 id="pageTitle"></h2>
+      <div id="grid" class="grid"></div>
+    </div>
+    <nav id="tabs" class="tabs" aria-label="Pages du tableau"></nav>
+  </div>
+</section>
+
+<!-- ================= VUE ADULTE ================= -->
+<section id="viewAdulte" hidden>
+  <nav class="anav" id="anav">
+    <button data-sec="posture">Se positionner</button>
+    <button data-sec="progression">Progression</button>
+    <button data-sec="occasions">Occasions du jour</button>
+    <button data-sec="suivi">Suivi</button>
+    <button data-sec="photos">Mes pictos photo</button>
+    <button data-sec="reglages">Réglages</button>
+    <button data-sec="sources">Sources</button>
+  </nav>
+  <div class="acontent" id="acontent"></div>
+</section>
+
+<!-- panneau d'aide à l'adulte -->
+<div id="sheet" class="sheet" hidden></div>
+
+<!-- minuteur d'attente -->
+<div id="waitOv" class="overlay" hidden>
+  <div>
+    <div class="ring" id="ring"><span id="ringN">7</span></div>
+    <p><b>J'attends, je regarde l'enfant.</b><br>Je ne répète pas la question. Je garde le tableau à sa portée.</p>
+    <button class="btn" id="waitStop">L'enfant a communiqué</button>
+    <button class="btn sec" id="waitEnd">Fermer</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script id="logic">
+/* =====================================================================
+   DONNÉES : vocabulaire codé couleur (clé de Fitzgerald modifiée)
+   ===================================================================== */
+const W = {};
+function add(c, list){ list.forEach(o => { o.c = c; W[o.id] = o; }); }
+
+// Personnes (jaune)
+add('pers', [
+  {id:'je', t:'je', e:'🙋', pron:'je'},
+  {id:'tu', t:'tu', e:'👉', pron:'tu'},
+  {id:'il', t:'il', e:'👦', pron:'il'},
+  {id:'elle', t:'elle', e:'👧', pron:'il'},
+  {id:'on', t:'on', e:'👫', pron:'il'},
+  {id:'maitresse', t:'la maîtresse', e:'👩‍🏫'},
+  {id:'maitre', t:'le maître', e:'👨‍🏫'},
+  {id:'aesh', t:"l'AESH", e:'🧑'},
+  {id:'copain', t:'le copain', e:'🧒'},
+  {id:'copine', t:'la copine', e:'👱‍♀️'},
+  {id:'maman', t:'maman', e:'👩'},
+  {id:'papa', t:'papa', e:'👨'},
+]);
+
+// Actions (vert) : f = [je, tu, il/elle/on]
+add('verbe', [
+  {id:'vouloir', t:'vouloir', e:'🙋‍♂️', f:['veux','veux','veut'], modal:1},
+  {id:'aller', t:'aller', e:'➡️', f:['vais','vas','va'], modal:1, lieu:'dans la cour'},
+  {id:'aimer', t:'aimer', e:'❤️', f:['aime','aimes','aime'], modal:1},
+  {id:'pouvoir', t:'pouvoir', e:'👍', f:['peux','peux','peut'], modal:1},
+  {id:'etre', t:'être', e:'🙂', f:['suis','es','est']},
+  {id:'courir', t:'courir', e:'🏃', f:['cours','cours','court'], plus:'vite', intr:1, lieu:'dans la cour'},
+  {id:'pousser', t:'pousser', e:'👐', f:['pousse','pousses','pousse'], plus:'le ballon', lieu:'dans la boîte'},
+  {id:'tirer', t:'tirer', e:'💪', f:['tire','tires','tire'], plus:'la corde'},
+  {id:'ouvrir', t:'ouvrir', e:'🔓', f:['ouvre','ouvres','ouvre'], plus:'la boîte'},
+  {id:'fermer', t:'fermer', e:'🔒', f:['ferme','fermes','ferme'], plus:'la porte'},
+  {id:'prendre', t:'prendre', e:'✊', f:['prends','prends','prend'], plus:'le crayon', lieu:'sur la table'},
+  {id:'donner', t:'donner', e:'🤲', f:['donne','donnes','donne'], plus:'le livre', lieu:'à la maîtresse'},
+  {id:'tomber', t:'tomber', e:'⬇️', f:['tombe','tombes','tombe'], plus:'par terre', intr:1},
+  {id:'mettre', t:'mettre', e:'📥', f:['mets','mets','met'], plus:'le cube', lieu:'dans la boîte'},
+  {id:'enlever', t:'enlever', e:'📤', f:['enlève','enlèves','enlève'], plus:'le manteau'},
+  {id:'chercher', t:'chercher', e:'🔍', f:['cherche','cherches','cherche'], plus:'le doudou', lieu:'sous la table'},
+  {id:'regarder', t:'regarder', e:'👀', f:['regarde','regardes','regarde'], plus:'le livre'},
+  {id:'attendre', t:'attendre', e:'⏳', f:['attends','attends','attend'], plus:'un peu', intr:1},
+  {id:'couper', t:'couper', e:'✂️', f:['coupe','coupes','coupe'], plus:'le papier'},
+  {id:'melanger', t:'mélanger', e:'🥄', f:['mélange','mélanges','mélange'], plus:'les couleurs'},
+  {id:'manger', t:'manger', e:'🍽️', f:['mange','manges','mange'], plus:'une pomme'},
+  {id:'boire', t:'boire', e:'🥤', f:['bois','bois','boit'], plus:"de l'eau"},
+  {id:'jouer', t:'jouer', e:'🧸', f:['joue','joues','joue'], plus:'avec la voiture', intr:1},
+  {id:'dormir', t:'dormir', e:'😴', f:['dors','dors','dort'], plus:'dans le lit', intr:1},
+  {id:'rouler', t:'rouler', e:'🔄', f:['roule','roules','roule'], plus:'vite', intr:1, lieu:'sous la table'},
+  {id:'lancer', t:'lancer', e:'🤾', f:['lance','lances','lance'], plus:'le ballon'},
+  {id:'dessiner', t:'dessiner', e:'🖍️', f:['dessine','dessines','dessine'], plus:'une maison'},
+  {id:'lire', t:'lire', e:'📖', f:['lis','lis','lit'], plus:'le livre'},
+  {id:'laver', t:'laver', e:'🧼', f:['lave','laves','lave'], plus:'les mains'},
+  {id:'aider', t:'aider', e:'🤝', f:['aide','aides','aide'], plus:'le copain'},
+  {id:'faire', t:'faire', e:'🛠️', f:['fais','fais','fait'], plus:'un puzzle'},
+  {id:'finir', t:'finir', e:'🏁', f:['finis','finis','finit'], plus:'le puzzle'},
+]);
+
+// Choses (orange) : g = m/f/p ; hv = action qui va avec ; suj = peut être sujet de hv
+const nom = (id,t,e,g,hv,suj,adj,pre) => ({id,t,e,g,hv,suj,adj:adj?[adj,!!pre]:null});
+add('nom', [
+  // jouets
+  nom('voiture','voiture','🚗','f','rouler',1,'rouge'),
+  nom('ballon','ballon','⚽','m','lancer',0,'gros',1),
+  nom('cubes','cubes','🧱','p','mettre',0,'petits',1),
+  nom('poupee','poupée','🪆','f','dormir',1,'petite',1),
+  nom('train','train','🚂','m','rouler',1,'long',0),
+  nom('puzzle','puzzle','🧩','m','faire',0,'grand',1),
+  nom('doudou','doudou','🧸','m','chercher',0,'petit',1),
+  nom('bulles','bulles','🫧','p','regarder',0,'grosses',1),
+  nom('pate','pâte à modeler','🟢','f','melanger',0,'verte'),
+  nom('toboggan','toboggan','🛝','m',null,0,'grand',1),
+  nom('balancoire','balançoire','🎠','f',null,0,'grande',1),
+  // manger
+  nom('pomme','pomme','🍎','f','manger',0,'rouge'),
+  nom('banane','banane','🍌','f','manger',0,'jaune'),
+  nom('gateau','gâteau','🍰','m','manger',0,'bon',1),
+  nom('pain','pain','🥖','m','manger',0,'long'),
+  nom('yaourt','yaourt','🥣','m','manger',0,'petit',1),
+  nom('compote','compote','🍏','f','manger',0,'sucrée'),
+  nom('eau','eau','💧','f','boire',0,'froide'),
+  nom('lait','lait','🥛','m','boire',0,'chaud'),
+  nom('biscuit','biscuit','🍪','m','manger',0,'petit',1),
+  // classe
+  nom('crayon','crayon','✏️','m','prendre',0,'bleu'),
+  nom('feutre','feutre','🖊️','m','prendre',0,'rouge'),
+  nom('papier','papier','📄','m','couper',0,'blanc'),
+  nom('ciseaux','ciseaux','✂️','p','prendre',0,'petits',1),
+  nom('colle','colle','🧴','f','prendre',0,'blanche'),
+  nom('livre','livre','📚','m','lire',0,'grand',1),
+  nom('peinture','peinture','🎨','f','melanger',0,'bleue'),
+  nom('tablette','tablette','📱','f','regarder',0,'noire'),
+  nom('manteau','manteau','🧥','m','enlever',0,'chaud'),
+  nom('chaussure','chaussure','👟','f','enlever',0,'blanche'),
+  // lieux
+  nom('maison','maison','🏠','f',null,0,'grande',1),
+  nom('boite','boîte','📦','f','ouvrir',0,'grande',1),
+  nom('table','table','🪑','f',null,0,'grande',1),
+  nom('cour','cour','🌳','f',null,0,'grande',1),
+  nom('parc','parc','🏞️','m',null,0,'grand',1),
+  nom('toilettes','toilettes','🚻','p',null,0,null),
+  nom('lit','lit','🛏️','m',null,0,'petit',1),
+]);
+
+// Descriptifs (bleu)
+add('desc', [
+  {id:'grand',t:'grand',e:'🦒',pre:1},{id:'petit',t:'petit',e:'🐭',pre:1},{id:'gros',t:'gros',e:'🐘',pre:1},
+  {id:'chaud',t:'chaud',e:'🔥'},{id:'froid',t:'froid',e:'🧊'},{id:'casse',t:'cassé',e:'💔'},
+  {id:'plein',t:'plein',e:'🫙'},{id:'vide',t:'vide',e:'⭕'},{id:'pareil',t:'pareil',e:'🟰'},
+  {id:'different',t:'différent',e:'↔️'},{id:'rouge',t:'rouge',e:'🔴'},{id:'bleu',t:'bleu',e:'🔵'},
+  {id:'jaune',t:'jaune',e:'🟡'},{id:'vert',t:'vert',e:'🟢'},{id:'vite',t:'vite',e:'💨',adv:1},
+  {id:'doucement',t:'doucement',e:'🐢',adv:1},
+  // émotions
+  {id:'content',t:'content',e:'😊',emo:1},{id:'triste',t:'triste',e:'😢',emo:1},{id:'colere',t:'en colère',e:'😠',emo:1},
+  {id:'fatigue',t:'fatigué',e:'🥱',emo:1},{id:'calme',t:'calme',e:'😌',emo:1},{id:'surpris',t:'surpris',e:'😮',emo:1},
+]);
+
+// Petits mots (violet) : prépositions, déterminants, connecteurs
+add('mot', [
+  {id:'dans',t:'dans',e:'📥',prep:1},{id:'sur',t:'sur',e:'⬆️',prep:1},{id:'sous',t:'sous',e:'⬇️',prep:1},
+  {id:'devant',t:'devant',e:'⏩',prep:1},{id:'derriere',t:'derrière',e:'⏪',prep:1},{id:'acote',t:'à côté de',e:'↔️',prep:1},
+  {id:'avec',t:'avec',e:'➕',prep:1},
+  {id:'le',t:'le',e:'◻️',det:1},{id:'la',t:'la',e:'◻️',det:1},{id:'les',t:'les',e:'◻️',det:1},
+  {id:'un',t:'un',e:'1️⃣',det:1},{id:'une',t:'une',e:'1️⃣',det:1},
+  {id:'et',t:'et',e:'🔗',conn:1},{id:'mais',t:'mais',e:'🔀',conn:1},{id:'parceque',t:'parce que',e:'💬',conn:1},
+  {id:'apres',t:'après',e:'⏭️',conn:1},{id:'puis',t:'puis',e:'➡️',conn:1},{id:'pas',t:'pas',e:'🚫'},
+]);
+
+// Mots sociaux (rose)
+add('social', [
+  {id:'bonjour',t:'bonjour',e:'👋'},{id:'aurevoir',t:'au revoir',e:'🙋'},{id:'oui',t:'oui',e:'✅'},
+  {id:'non',t:'non',e:'❌'},{id:'merci',t:'merci',e:'🙏'},{id:'stp',t:"s'il te plaît",e:'🤲'},
+  {id:'encore',t:'encore',e:'🔁'},{id:'stop',t:'stop',e:'✋'},{id:'atoi',t:'à toi',e:'👉'},
+  {id:'amoi',t:'à moi',e:'🙋'},{id:'bravo',t:'bravo',e:'👏'},{id:'cestbon',t:"c'est bon",e:'👌'},
+]);
+
+// Questions (gris)
+add('quest', [
+  {id:'qui',t:'qui ?',e:'👤'},{id:'quoi',t:'quoi ?',e:'❓'},{id:'ou',t:'où ?',e:'📍'},
+  {id:'quand',t:'quand ?',e:'🕐'},{id:'pourquoi',t:'pourquoi ?',e:'🤷'},{id:'cestquoi',t:"c'est quoi ?",e:'🔎'},
+  {id:'onfait',t:'on fait quoi ?',e:'📋'},{id:'fini',t:"c'est fini ?",e:'🏁'},
+]);
+
+// Démarreurs pragmatiques (page de début, comme dans un classeur PODD)
+add('prag', [
+  {id:'p_veux', t:'Je veux', e:'🙋‍♂️', addT:['je','vouloir'], go:'jouets', fn:'demander'},
+  {id:'p_nonveux', t:'je ne veux pas', e:'🙅', pron:'je', modal:1, f:['ne veux pas','ne veux pas','ne veut pas'], go:'actions', fn:'refuser'},
+  {id:'p_aide', t:'aide-moi', e:'🆘', go:'actions', fn:'demander'},
+  {id:'p_dire', t:"j'ai quelque chose à dire", e:'💬', go:'personnes', fn:'commenter'},
+  {id:'p_regarde', t:'regarde !', e:'👀', go:'jouets', fn:'commenter'},
+  {id:'p_sens', t:'je me sens', e:'🫶', go:'emotions', fn:'commenter'},
+  {id:'p_question', t:"j'ai une question", e:'❓', go:'questions', fn:'questionner'},
+  {id:'p_joue', t:'on joue ?', e:'🎲', go:'jouets', fn:'demander'},
+  {id:'p_pause', t:"j'ai besoin d'une pause", e:'🧘', fn:'demander'},
+  {id:'p_fini', t:"j'ai fini", e:'🏁', fn:'commenter'},
+  {id:'p_arrete', t:'arrête !', e:'🛑', fn:'refuser'},
+  {id:'p_mal', t:"j'ai mal", e:'🤕', fn:'commenter'},
+]);
+
+const PAGES = [
+  {id:'accueil', t:'Début', c:'prag', items:['p_veux','p_nonveux','p_aide','p_dire','p_regarde','p_sens','p_question','p_joue','p_pause','p_fini','p_arrete','p_mal']},
+  {id:'personnes', t:'Personnes', c:'pers', items:['je','tu','il','elle','on','maitresse','maitre','aesh','copain','copine','maman','papa']},
+  {id:'actions', t:'Actions', c:'verbe', items:['vouloir','aller','aimer','pouvoir','etre','courir','pousser','tirer','ouvrir','fermer','prendre','donner','tomber','mettre','enlever','chercher','regarder','attendre','couper','melanger','manger','boire','jouer','dormir','rouler','lancer','dessiner','lire','laver','aider','faire','finir']},
+  {id:'jouets', t:'Jouer', c:'nom', items:['voiture','ballon','cubes','poupee','train','puzzle','doudou','bulles','pate','toboggan','balancoire','livre']},
+  {id:'manger', t:'Manger', c:'nom', items:['pomme','banane','gateau','pain','yaourt','compote','biscuit','eau','lait']},
+  {id:'classe', t:'Classe', c:'nom', items:['crayon','feutre','papier','ciseaux','colle','livre','peinture','tablette','manteau','chaussure']},
+  {id:'lieux', t:'Où ?', c:'mot', items:['dans','sur','sous','devant','derriere','acote','avec','maison','boite','table','cour','parc','toilettes','lit']},
+  {id:'comment', t:'Comment', c:'desc', items:['grand','petit','gros','chaud','froid','casse','plein','vide','pareil','different','rouge','bleu','jaune','vert','vite','doucement']},
+  {id:'emotions', t:'Émotions', c:'desc', items:['etre','content','triste','colere','fatigue','calme','surpris','p_mal','p_pause']},
+  {id:'petits', t:'Petits mots', c:'mot', items:['le','la','les','un','une','et','mais','parceque','apres','puis','pas','avec']},
+  {id:'social', t:'Dire à l\'autre', c:'social', items:['bonjour','aurevoir','oui','non','merci','stp','encore','stop','atoi','amoi','bravo','cestbon']},
+  {id:'questions', t:'Questions', c:'quest', items:['qui','quoi','ou','quand','pourquoi','cestquoi','onfait','fini']},
+  {id:'photos', t:'Mes photos', c:'nom', items:[]},
+];
+
+/* =====================================================================
+   LANGUE : rendu d'une production, reformulation et +1
+   ===================================================================== */
+const P = {je:0, tu:1, il:2};
+const conj = (v,p) => v.f ? v.f[P[p]] : v.t;
+const SWAP = {je:['tu','tu'], tu:['je','je'], il:['il','il']};
+function art(n){ if(!n || n.noArt) return ''; return n.g==='p' ? 'les' : n.g==='f' ? 'la' : 'le'; }
+function NP(n, adj){
+  if(!n) return '';
+  const a = art(n);
+  if(!adj) return [a, n.t].join(' ');
+  return adj[1] ? [a, adj[0], n.t].join(' ') : [a, n.t, adj[0]].join(' ');
+}
+function joinFr(parts){
+  let s = parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+  s = s.replace(/(^|\s)de le\s/gi,'$1du ').replace(/(^|\s)de les\s/gi,'$1des ')
+       .replace(/(^|\s)à le\s/gi,'$1au ').replace(/(^|\s)à les\s/gi,'$1aux ');
+  s = s.replace(/(^|\s)(je|le|la|ne|de|que)\s+(?=[aeiouyhàâéèêëîïôûù])/gi, (m,sp,w) => sp + w.slice(0,-1) + "'");
+  return s;
+}
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+// Texte de la production telle que l'enfant l'a construite (conjugaison automatique, pas d'ajout d'articles)
+function textOf(ids){
+  const out=[]; let subj=null;
+  ids.forEach((id,i) => {
+    const w=W[id]; if(!w) return;
+    const prev = i>0 ? W[ids[i-1]] : null;
+    if(w.pron && !w.f){ subj=w.pron; out.push(w.t); return; }
+    if(w.c==='pers'){ subj='il'; out.push(w.t); return; }
+    if(w.c==='prag'){ if(w.pron) subj=w.pron; out.push(w.t); return; }
+    if(w.c==='verbe'){
+      if(prev && prev.modal) out.push(w.t);
+      else if(subj) out.push(conj(w,subj));
+      else out.push(w.t);
+      return;
+    }
+    if(w.c==='nom'){ if(!subj && !ids.slice(0,i).some(x=>W[x]&&W[x].c==='verbe')) subj='il'; out.push(w.t); return; }
+    out.push(w.t);
+  });
+  return joinFr(out);
+}
+
+// Analyse simple de la production → réponse de l'adulte (reformulation) et suggestion « +1 »
+function respond(ids){
+  const ws = ids.map(id=>W[id]).filter(Boolean);
+  let subj=null, modal=null, verb=null, obj=null, place=null, pending=null;
+  const adjs=[], conns=[], socials=[], emos=[];
+  let lastPrep=null;
+  ws.forEach(w => {
+    if(w.c==='pers'){
+      const s = w.pron ? {txt:SWAP[w.pron][0], p:SWAP[w.pron][1]} : {txt:w.t, p:'il'};
+      if(!subj && !verb && !modal) subj=s;
+      else if(!obj) obj={pers:w};
+      return;
+    }
+    if(w.c==='prag'){ if(w.modal){ subj={txt:SWAP[w.pron][0],p:SWAP[w.pron][1]}; modal=w; } return; }
+    if(w.c==='verbe'){ if(w.modal && !modal && !verb) modal=w; else if(!verb) verb=w; return; }
+    if(w.c==='nom'){
+      if(lastPrep){ place={prep:lastPrep, noun:w}; lastPrep=null; return; }
+      if(!verb && !modal && !subj && !pending){ pending=w; return; }
+      if(!obj){ obj={noun:w}; return; }
+      return;
+    }
+    if(w.c==='mot'){ if(w.prep){ lastPrep=w; } else if(w.conn) conns.push(w); return; }
+    if(w.c==='desc'){ if(w.emo) emos.push(w); else adjs.push(w); return; }
+    if(w.c==='social') socials.push(w);
+  });
+  if(lastPrep && !place) place={prep:lastPrep, noun:null};
+
+  // Nom isolé avant le verbe : sujet ou objet ?
+  let subjNoun=null;
+  if(pending){
+    if(verb){
+      if(verb.intr || verb.id===pending.hv && pending.suj) subjNoun=pending;
+      else if(!obj) obj={noun:pending};
+    } else if(modal){ if(!obj) obj={noun:pending}; }
+  }
+
+  const hasContent = pending||verb||modal||obj||place||adjs.length||emos.length||subj;
+  const fn = guessFn(ids);
+  if(!hasContent){
+    return {reform:null, plus:null,
+      tip: fn==='refuser' ? "Respectez le refus, nommez-le en montrant les pictos : « Tu ne veux pas. Stop. »"
+         : fn==='questionner' ? "Répondez à la question en pointant les pictos de votre réponse."
+         : "Répondez d'abord à ce que l'enfant demande, puis modélisez une phrase de 2 pictos en parlant."};
+  }
+
+  // Émotion seule ou « être » + émotion
+  if(emos.length && !pending && !obj){
+    const who = subj || {txt:'tu', p:'tu'};
+    const base = [who.txt, conj(W.etre, who.p), emos[0].t];
+    return {reform:cap(joinFr(['oui,'].concat(base)))+'.',
+            plus:cap(joinFr(base))+' parce que… ?',
+            tip:"Nommez l'émotion, puis ouvrez vers la cause avec « parce que ». Laissez l'enfant compléter."};
+  }
+
+  // Adjectif demandé par l'enfant : on l'accroche au nom le plus proche
+  const tgtNoun = (obj&&obj.noun) || subjNoun || (place&&place.noun) || (!verb&&!modal?pending:null);
+  const childAdj = adjs.find(a=>!a.adv);
+  const adv = adjs.find(a=>a.adv);
+  const adjOf = n => (childAdj && n===tgtNoun) ? [childAdj.t, !!childAdj.pre] : null;
+
+  function sentence(o){
+    const parts=[];
+    if(o.subjNoun) parts.push(NP(o.subjNoun, o.adjFor===o.subjNoun?o.adj:null));
+    else if(o.subj) parts.push(o.subj.txt);
+    const p = o.subjNoun ? 'il' : o.subj ? o.subj.p : 'tu';
+    if(o.modal) parts.push(conj(o.modal,p) + (o.verb?' '+o.verb.t:''));
+    else if(o.verb) parts.push(conj(o.verb,p));
+    if(o.obj){ if(o.obj.pers) parts.push(o.obj.pers.t); else parts.push(NP(o.obj.noun, o.adjFor===o.obj.noun?o.adj:null)); }
+    if(o.extra) parts.push(o.extra);
+    if(o.adv) parts.push(o.adv);
+    if(o.place) parts.push(o.place.prep.t, o.place.noun ? NP(o.place.noun, o.adjFor===o.place.noun?o.adj:null) : '');
+    if(o.placeTxt) parts.push(o.placeTxt);
+    return joinFr(parts);
+  }
+
+  // ---- Cas sans verbe : un nom (avec éventuellement « encore », un adjectif…) ----
+  if(!verb && !modal){
+    const n = pending || (obj&&obj.noun) || (place&&place.noun);
+    const pre = socials.some(s=>s.id==='encore') ? 'encore' : 'oui,';
+    if(!n){
+      const a = childAdj || adv;
+      return {reform:cap(joinFr([pre,"c'est",a?a.t:'']))+' !', plus:null,
+        tip:"Montrez la chose dont parle l'enfant et nommez-la avec le mot qu'il a choisi."};
+    }
+    let np = NP(n, adjOf(n));
+    if(pre==='encore') np = np.replace(/^les /,'des ').replace(/^le /,'du ').replace(/^la /,'de la ');
+    const reform = cap(joinFr([pre, place?place.prep.t:'', np]))+' !';
+    const v = n.hv ? W[n.hv] : null;
+    let plus=null;
+    if(v){
+      plus = n.suj ? cap(sentence({subjNoun:n, verb:v, adj:adjOf(n), adjFor:n, extra:v.intr?v.plus:''}))+' !'
+                   : cap(sentence({subj:{txt:'tu',p:'tu'}, verb:v, obj:{noun:n}, adj:adjOf(n), adjFor:n}))+' !';
+    } else if(n.adj && !childAdj){
+      plus = cap(joinFr(['oui,', NP(n, n.adj)]))+' !';
+    }
+    return {reform, plus, tip:"Nom seul → ajoutez un mot d'action. Montrez le picto « action » pendant que vous le dites."};
+  }
+
+  // ---- Cas avec verbe ----
+  const base = {subj: subjNoun?null:(subj||{txt:'tu',p:'tu'}), subjNoun, modal, verb, obj, place,
+                adj: tgtNoun?adjOf(tgtNoun):null, adjFor:tgtNoun, adv: adv?adv.t:''};
+  const reform = cap(joinFr(['oui,', sentence(base)]))+' !';
+
+  const nx = Object.assign({}, base);
+  let tip='';
+  const v = verb || null;
+  const nounHere = (obj&&obj.noun) || subjNoun || (place&&place.noun);
+  if(!subj && !subjNoun && ws.filter(w=>w.c!=='social').length<=1){
+    // l'enfant a produit un verbe seul : la reformulation ajoute déjà le sujet
+    if(v && v.plus && !v.intr){ nx.extra=v.plus; tip="Verbe seul → votre modèle ajoute « qui » et « quoi »."; }
+    else { tip="Verbe seul → votre modèle ajoute « qui » fait l'action."; }
+  } else if(!obj && !place && v && v.plus && !v.intr){
+    nx.extra=v.plus; tip="Ajoutez « quoi » : le complément de l'action.";
+  } else if(!obj && !place && modal && !v){
+    nx.extra='ça'; tip="Montrez ce que l'enfant veut et nommez-le.";
+  } else if(nounHere && !childAdj && nounHere.adj){
+    nx.adj=nounHere.adj; nx.adjFor=nounHere; tip="Ajoutez un mot qui décrit (taille, couleur…).";
+  } else if(!place && v && (v.lieu || (v.intr && v.plus))){
+    if(v.lieu) nx.placeTxt=v.lieu; else nx.extra=v.plus;
+    tip="Ajoutez « où » ou « comment ».";
+  } else if(!conns.length){
+    return {reform, plus:cap(reform.replace(/^Oui, /,'').replace(/ !$/,''))+' parce que… ?', tip:"Phrase déjà riche → ouvrez vers « parce que » ou « et après ? » sans exiger de réponse."};
+  } else {
+    return {reform, plus:null, tip:"Très belle phrase : reprenez-la telle quelle, avec enthousiasme."};
+  }
+  const plus = cap(joinFr([sentence(nx)]))+' !';
+  return {reform, plus: plus===reform.replace(/^Oui, /,'').replace(/^./,c=>c.toUpperCase()) ? null : plus, tip};
+}
+
+function guessFn(ids){
+  const has = x => ids.includes(x);
+  const fnOf = ids.map(id=>W[id]&&W[id].fn).filter(Boolean);
+  if(has('non')||has('stop')||has('p_nonveux')||has('p_arrete')||(has('pas'))) return 'refuser';
+  if(ids.some(id=>W[id]&&W[id].c==='quest')||has('p_question')) return 'questionner';
+  if(has('vouloir')||has('encore')||has('stp')||has('amoi')) return 'demander';
+  if(fnOf.length) return fnOf[0];
+  if(ids.every(id=>W[id]&&W[id].c==='social')) return 'social';
+  return 'commenter';
+}
+
+// nombre d'éléments (pictos) d'une production
+const lenOf = ids => ids.length;
+</script>
+
+<script>
+/* =====================================================================
+   INTERFACE
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const K = 'adaptparole.';
+function load(k,d){ try{ const v=localStorage.getItem(K+k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function save(k,v){ try{ localStorage.setItem(K+k, JSON.stringify(v)); }catch(e){ toast("Mémoire du navigateur pleine : supprimez des photos."); } }
+const today = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const hm = () => { const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+
+const RELAIS_DEFAUT = 'https://adaptedl-relais.chris333j.workers.dev';
+const MODELES_ALBERT = ['Mistral-Small-3.2-24B','openweight-medium'];
+let settings = Object.assign({prenom:'', niveau:2, taille:'m', lireToucher:true, aideAdulte:true, verrou:true, rate:0.9, albert:true, relais:RELAIS_DEFAUT}, load('settings',{}));
+let logData = load('log', []);
+let counters = load('cnt', {});
+let custom = load('custom', []);
+const S = {page:'accueil', hist:[], strip:[], spoken:false, modeling:false, section:'posture'};
+
+function cnt(){ const d=today(); if(!counters[d]) counters[d]={occ:{habillage:0,jeu:0,album:0,repas:0,activite:0}, ad:{comment:0,question:0,attente:0,modele:0,enrichi:0}}; return counters[d]; }
+function bump(group,key,delta=1){ const c=cnt(); c[group][key]=Math.max(0,(c[group][key]||0)+delta); save('cnt',counters); }
+
+/* ---------- personnalisation ---------- */
+function registerCustom(){
+  PAGES.forEach(p => p.items = p.items.filter(id=>!id.startsWith('c_')));
+  custom.forEach(c => {
+    W[c.id] = c.cls==='nom' ? {id:c.id,t:c.t,img:c.img,c:'nom',g:c.g||'m',adj:null}
+            : c.cls==='verbe' ? {id:c.id,t:c.t,img:c.img,c:'verbe'}
+            : {id:c.id,t:c.t,img:c.img,c:c.cls,noArt:true};
+    const pg = PAGES.find(p=>p.id===c.page); if(pg && c.page!=='photos') pg.items.push(c.id);
+  });
+  PAGES.find(p=>p.id==='photos').items = custom.map(c=>c.id);
+}
+function applySettings(){
+  document.documentElement.style.setProperty('--tile', {s:'100px',m:'124px',l:'160px'}[settings.taille]||'124px');
+  $('#who').textContent = settings.prenom ? '· tableau de '+settings.prenom : '';
+}
+
+/* ---------- voix ---------- */
+let voice=null;
+function pickVoice(){ const vs=speechSynthesis.getVoices(); voice = vs.find(v=>/^fr[-_]FR/i.test(v.lang)) || vs.find(v=>/^fr/i.test(v.lang)) || null; }
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(t){
+  if(!('speechSynthesis' in window) || !t) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t.replace(/\?/g,' ?')); u.lang='fr-FR'; if(voice) u.voice=voice; u.rate=settings.rate;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- tableau ---------- */
+function tileHTML(w, cls){
+  const vis = w.img ? `<img src="${w.img}" alt="">` : `<span class="em" aria-hidden="true">${w.e||'⬜'}</span>`;
+  const go = w.go ? '<span class="go" aria-hidden="true">▶</span>' : '';
+  return `<button class="tile c-${w.c} ${w.c==='prag'?'prag':''}" data-id="${w.id}" aria-label="${w.t}">${go}${vis}<span>${w.t}</span></button>`;
+}
+function renderTabs(){
+  $('#tabs').innerHTML = PAGES.filter(p=>p.id!=='photos'||custom.length).map(p=>
+    `<button class="c-${p.c} ${p.id===S.page?'cur':''}" data-page="${p.id}">${p.t}</button>`).join('');
+}
+function renderPage(){
+  const p = PAGES.find(x=>x.id===S.page) || PAGES[0];
+  $('#pageTitle').innerHTML = `<i style="background:var(--k-${p.c==='prag'?'pers':p.c})"></i>${p.t}`;
+  $('#grid').innerHTML = p.items.length ? p.items.map(id=>W[id]?tileHTML(W[id]):'').join('')
+    : '<p class="lead">Aucun picto photo. Ajoutez-en depuis l\'espace adulte, rubrique « Mes pictos photo ».</p>';
+  renderTabs();
+  $('#pageBox').scrollTop=0;
+}
+function goPage(id, remember=true){ if(id===S.page) return; if(remember) S.hist.push(S.page); S.page=id; renderPage(); }
+function renderStrip(){
+  const st=$('#strip');
+  st.classList.toggle('model', S.modeling);
+  if(!S.strip.length){ st.innerHTML = `<span class="empty">${S.modeling?'Mode modélisation : touchez les pictos en parlant.':'Touche les images pour faire ta phrase.'}</span>`; return; }
+  st.innerHTML = S.strip.map(id=>{ const w=W[id]; return `<span class="chip c-${w.c}">${w.img?`<img src="${w.img}" alt="">`:`<span class="em">${w.e}</span>`}${w.t}</span>`; }).join('')
+    + `<span class="said">« ${cap(textOf(S.strip))} »</span>`;
+  st.scrollLeft = st.scrollWidth;
+}
+function tapWord(id){
+  const w=W[id]; if(!w) return;
+  if(S.spoken){ S.strip=[]; S.spoken=false; }
+  const toAdd = w.addT || [id];
+  S.strip.push(...toAdd);
+  if(settings.lireToucher) speak(w.addT ? 'je veux' : w.t);
+  renderStrip();
+  if(w.go) goPage(w.go);
+}
+$('#grid').addEventListener('click', e => { const b=e.target.closest('.tile'); if(!b) return; b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'),120); tapWord(b.dataset.id); });
+$('#tabs').addEventListener('click', e => { const b=e.target.closest('button'); if(b) goPage(b.dataset.page); });
+$('#bBack').onclick = () => { S.strip.pop(); S.spoken=false; renderStrip(); };
+$('#bClear').onclick = () => { S.strip=[]; S.spoken=false; renderStrip(); };
+$('#oHome').onclick = () => { S.hist=[]; S.page='accueil'; renderPage(); };
+$('#oPrev').onclick = () => { if(S.hist.length){ S.page=S.hist.pop(); renderPage(); } };
+$('#oOups').onclick = () => { S.strip.pop(); S.spoken=false; renderStrip(); speak('oups, erreur'); };
+$('#oNoWord').onclick = () => speak("Je n'ai pas le mot. Aide-moi à trouver.");
+$('#oOther').onclick = () => speak("C'est autre chose.");
+
+$('#bSay').onclick = () => {
+  if(!S.strip.length){ speak("Touche les images pour faire ta phrase."); return; }
+  const txt = cap(textOf(S.strip));
+  speak(txt); S.spoken=true;
+  if(S.modeling){
+    logData.push({d:today(), h:hm(), ids:[...S.strip], txt, n:lenOf(S.strip), type:'modele', fn:guessFn(S.strip)});
+    save('log',logData); bump('ad','modele'); toast('Modèle adulte noté');
+  } else if(settings.aideAdulte){ openSheet([...S.strip], txt); }
+};
+
+/* ---------- Albert (IA de l'État) via le relais Cloudflare ---------- */
+const iaDispo = () => settings.albert && !!settings.relais && navigator.onLine;
+async function appelAlbert(systeme, demande, enJson=true, maxTok=500){
+  let derniere=null;
+  for(const modele of MODELES_ALBERT){
+    const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort(), 15000);
+    try{
+      const rep = await fetch(settings.relais, {method:'POST', headers:{'Content-Type':'application/json'}, signal:ctrl.signal,
+        body: JSON.stringify({model:modele, max_tokens:maxTok, temperature:0.2,
+          messages:[{role:'system',content:systeme},{role:'user',content:demande}]})});
+      clearTimeout(t);
+      if(rep.status===403) throw new Error('origine refusée par le relais');
+      if(rep.status===429) throw new Error('trop de demandes, réessayez dans un instant');
+      if(rep.status===502) throw new Error("le relais n'atteint pas Albert");
+      if(!rep.ok) throw new Error('le relais a répondu '+rep.status);
+      const d = await rep.json();
+      const txt = (((d.choices||[])[0]||{}).message||{}).content||'';
+      if(!enJson) return txt.trim();
+      const a=txt.indexOf('{'), b=txt.lastIndexOf('}');
+      if(a<0||b<0) throw new Error('réponse illisible');
+      return JSON.parse(txt.slice(a,b+1));
+    }catch(e){
+      clearTimeout(t); derniere = e.name==='AbortError' ? new Error('Albert trop lent') : e;
+      if(/origine|trop de demandes|n'atteint pas/.test(derniere.message)) throw derniere;
+    }
+  }
+  throw derniere || new Error("le relais n'a pas répondu");
+}
+const SYS_REPONSE = `Tu es orthophoniste, spécialiste de la CAA (PODD) et de l'Enhanced Milieu Teaching auprès d'enfants autistes de 5-6 ans en grande section de maternelle.
+On te donne une production d'un enfant (pictos touchés sur son tableau de communication, ou paroles dites à l'oral) et le niveau syntaxique visé.
+Tu proposes ce que l'adulte (AESH ou enseignant) peut répondre à l'enfant :
+- "reformulation" : la même intention, en français correct, adressée à l'enfant (je devient tu), très courte, commençant par « Oui, » sauf refus ou question. Ne jamais corriger ni demander de répéter.
+- "plus1" : la reformulation enrichie d'UN SEUL élément de plus (sujet, action, complément, mot qui décrit, lieu, ou « parce que »), vraisemblable dans une classe de maternelle.
+- "conseil" : une phrase courte pour l'adulte (quel picto pointer en parlant, quoi attendre).
+- "fonction" : un mot parmi demander, commenter, refuser, choisir, raconter, questionner, social.
+Si l'enfant refuse, respecte le refus. Si c'est une écholalie, réponds à l'intention probable.
+Tu réponds uniquement par un objet JSON valide, sans aucun texte autour, sans balises de code.`;
+async function reponseAlbert(txt, ids, oral){
+  const detail = ids.length ? '\nPictos touchés, dans l\'ordre : '+ids.map(id=>W[id]?W[id].t:'').join(' | ') : '';
+  const niv = LEVELS.find(l=>l.n===Math.min(7,settings.niveau+1));
+  const demande = `Production ${oral?'dite à l\'oral':'faite sur le tableau'} : « ${txt} »${detail}
+Niveau syntaxique visé : ${niv.n} (${niv.syn}, exemple : ${niv.ex}).`;
+  const j = await appelAlbert(SYS_REPONSE, demande, true, 400);
+  if(!j.reformulation) throw new Error('réponse incomplète');
+  return {reform:j.reformulation, plus:j.plus1||null, tip:j.conseil||'', fn:(FNS.find(f=>f[0]===j.fonction)||[null])[0], src:'albert'};
+}
+
+/* ---------- panneau d'aide à l'adulte ---------- */
+const TYPES = [['spont','Spontané (il initie)'],['solli','Réponse à une sollicitation'],['imit','Imitation / écholalie']];
+const FNS = [['demander','Demander'],['commenter','Commenter'],['refuser','Refuser'],['choisir','Choisir'],['raconter','Raconter'],['questionner','Questionner'],['social','Saluer / social']];
+function openSheet(ids, txt, oral=false){
+  let r = oral ? {reform:null, plus:null, tip:"Sans réseau : reprenez sa phrase correctement, puis ajoutez un seul élément (qui, quoi, où, comment)."} : respond(ids);
+  let type='spont', fn=oral?'commenter':guessFn(ids), enrichi=true, iaEtat='';
+  const nb = oral ? txt.split(/\s+/).filter(Boolean).length : lenOf(ids);
+  const sh=$('#sheet');
+  const draw = () => {
+    sh.innerHTML = `
+      <div class="row" style="justify-content:space-between"><h3>Pour l'adulte · ${nb} ${oral?'mot':'picto'}${nb>1?'s':''}${oral?' à l\'oral':''}${r.src==='albert'?'<span class="ai">✨ Albert</span>':''}</h3>
+        <button class="pill noprint" id="shClose">Fermer</button></div>
+      <div class="prod">« ${txt} »</div>
+      ${iaEtat?`<div class="aiwait">${iaEtat}</div>`:''}
+      <div class="sgrid">
+        <div class="box" style="margin:0"><h3>1. J'accueille et je reformule</h3>
+          ${r.reform?`<div class="resp">« ${r.reform} »<button class="speak" data-say="${r.reform}">🔊</button></div>`:''}
+          <div class="tip">${r.reform?'Même intention, forme correcte. Ne demandez pas de répéter.':r.tip}</div></div>
+        <div class="box" style="margin:0"><h3>2. J'enrichis de +1</h3>
+          ${r.plus?`<div class="resp">« ${r.plus} »<button class="speak" data-say="${r.plus}">🔊</button></div>`:''}
+          <div class="tip">${r.reform?r.tip:'—'} Suggestion à adapter à ce que l'enfant veut vraiment dire.</div></div>
+      </div>
+      <h3>Comment est venue cette phrase ?</h3>
+      <div class="grp">${TYPES.map(([k,l])=>`<button class="pill ${k===type?'on':''}" data-type="${k}">${l}</button>`).join('')}</div>
+      <h3>À quoi elle sert ?</h3>
+      <div class="grp">${FNS.map(([k,l])=>`<button class="pill ${k===fn?'on':''}" data-fn="${k}">${l}</button>`).join('')}</div>
+      <div class="row" style="margin-top:8px">
+        <button class="pill ${enrichi?'on':''}" id="shEnr">J'ai répondu en enrichissant</button>
+        <button class="btn" id="shSave">Noter dans le suivi</button>
+        <button class="btn sec" id="shWait">⏳ Attendre d'abord</button>
+      </div>`;
+  };
+  draw(); sh.hidden=false;
+  if(iaDispo()){
+    iaEtat='Albert prépare une réponse plus fine…'; draw();
+    const jeton = sh._jeton = Date.now();
+    reponseAlbert(txt, ids, oral).then(a=>{
+      if(sh._jeton!==jeton) return;
+      r=a; if(a.fn) fn=a.fn; iaEtat=''; draw();
+    }).catch(e=>{ if(sh._jeton!==jeton) return; iaEtat='Albert indisponible ('+e.message+') : suggestion faite sur l\'appareil.'; draw(); });
+  } else if(oral){ iaEtat = settings.albert ? 'Pas de réseau : Albert est indisponible.' : ''; draw(); }
+  sh.onclick = e => {
+    const t=e.target.closest('button'); if(!t) return;
+    if(t.dataset.say){ speak(t.dataset.say); return; }
+    if(t.dataset.type){ type=t.dataset.type; draw(); return; }
+    if(t.dataset.fn){ fn=t.dataset.fn; draw(); return; }
+    if(t.id==='shEnr'){ enrichi=!enrichi; draw(); return; }
+    if(t.id==='shClose'){ sh.hidden=true; return; }
+    if(t.id==='shWait'){ startWait(); return; }
+    if(t.id==='shSave'){
+      logData.push({d:today(), h:hm(), ids, txt, n:nb, type, fn, oral});
+      save('log',logData); if(enrichi) bump('ad','enrichi');
+      sh.hidden=true; toast('Noté');
+    }
+  };
+}
+
+/* ---------- phrase dite à l'oral ---------- */
+$('#btnOral').onclick = () => {
+  const sh=$('#sheet'); sh._jeton=0;
+  sh.innerHTML = `<div class="row" style="justify-content:space-between"><h3>Ce que l'enfant a dit à l'oral</h3><button class="pill" id="oX">Fermer</button></div>
+    <textarea class="oral" id="oT" placeholder="ex. garçon courir" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+    <p class="tip">Écrivez ses mots tels quels, même incomplets ou répétés. Le prénom n'est jamais envoyé.</p>
+    <div class="row"><button class="btn" id="oGo">Proposer une réponse</button></div>`;
+  sh.hidden=false; setTimeout(()=>$('#oT').focus(),50);
+  sh.onclick = e => { const t=e.target.closest('button'); if(!t) return;
+    if(t.id==='oX'){ sh.hidden=true; }
+    if(t.id==='oGo'){ const v=$('#oT').value.trim(); if(!v){ toast('Écrivez ce que l\'enfant a dit'); return; } openSheet([], v, true); } };
+};
+
+/* ---------- minuteur d'attente ---------- */
+let waitTimer=null;
+function startWait(){
+  const total=7; let left=total;
+  $('#waitOv').hidden=false; $('#ringN').textContent=left; $('#ring').style.setProperty('--p','100%');
+  bump('ad','attente');
+  clearInterval(waitTimer);
+  waitTimer=setInterval(()=>{ left--; $('#ringN').textContent=Math.max(left,0); $('#ring').style.setProperty('--p', (left/total*100)+'%');
+    if(left<=0){ clearInterval(waitTimer); $('#ringN').textContent='✓'; } },1000);
+}
+function stopWait(){ clearInterval(waitTimer); $('#waitOv').hidden=true; }
+$('#btnWait').onclick = startWait;
+$('#waitEnd').onclick = stopWait;
+$('#waitStop').onclick = () => { stopWait(); toast("Bravo : l'attente a laissé la place à l'enfant."); };
+
+/* ---------- modélisation ---------- */
+$('#btnModel').onclick = () => {
+  S.modeling=!S.modeling; $('#btnModel').classList.toggle('on',S.modeling);
+  $('#pageBox').classList.toggle('modelmode',S.modeling);
+  if(S.modeling){ S.strip=[]; S.spoken=false; }
+  renderStrip();
+};
+
+/* ---------- accès adulte (appui long) ---------- */
+(function(){
+  const b=$('#btnAdult'); let t=null;
+  const start = e => { if(!settings.verrou){ openAdult(); return; } e.preventDefault(); b.classList.add('pressing'); t=setTimeout(()=>{ b.classList.remove('pressing'); openAdult(); },1000); };
+  const end = () => { clearTimeout(t); b.classList.remove('pressing'); };
+  b.addEventListener('pointerdown', start); b.addEventListener('pointerup', end); b.addEventListener('pointerleave', end); b.addEventListener('pointercancel', end);
+  b.addEventListener('click', e => { if(!settings.verrou) return; if(!b.classList.contains('pressing')) toast("Appui long pour ouvrir l'espace adulte"); });
+})();
+function openAdult(){ $('#viewEleve').hidden=true; $('#viewAdulte').hidden=false; $('#btnAdult').hidden=true; $('#btnModel').hidden=true; $('#btnOral').hidden=true; $('#btnBoard').hidden=false; $('#sheet').hidden=true; renderSection(); }
+$('#btnBoard').onclick = () => { $('#viewEleve').hidden=false; $('#viewAdulte').hidden=true; $('#btnAdult').hidden=false; $('#btnModel').hidden=false; $('#btnOral').hidden=false; $('#btnBoard').hidden=true; registerCustom(); renderPage(); };
+$('#anav').addEventListener('click', e => { const b=e.target.closest('button'); if(b){ S.section=b.dataset.sec; renderSection(); } });
+
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1800); }
+
+/* =====================================================================
+   ESPACE ADULTE
+   ===================================================================== */
+const LEVELS = [
+  {n:1, syn:'1 mot', ex:'ballon · encore · aide', vocab:'Noms et mots sociaux vraiment utiles (encore, aide, fini, stop)', model:'« Ballon ! Le ballon. » en montrant le picto', act:"Choix entre 2 objets tenus hors de portée ; pause au milieu d'un jeu qu'il aime."},
+  {n:2, syn:'2 mots', ex:'pousse ballon · encore bulles', vocab:'Verbes : pousser, ouvrir, mettre, prendre, donner, tomber…', model:'« Pousse ballon ! » puis « Tu pousses le ballon. »', act:'Jeux de causalité (rampe, tour de cubes) : chaque action est nommée par un verbe.'},
+  {n:3, syn:'Sujet + verbe', ex:'je pousse · la voiture roule', vocab:'Pronoms je / tu / il / elle ; personnes de la classe', model:'Reprise avec le sujet : « Oui, la voiture roule ! »', act:"Commentaire de l'action des pairs à la récréation ou en motricité."},
+  {n:4, syn:'Sujet + verbe + objet', ex:'je pousse le ballon', vocab:'Articles le / la / un / une, pluriel les', model:'« Tu pousses le ballon. » en pointant chaque picto', act:'Recettes, habillage, rangement : « je mets le manteau ».'},
+  {n:5, syn:'Expansion', ex:'je pousse le gros ballon · … dans la boîte', vocab:'Adjectifs (grand, petit, couleurs) et prépositions (dans, sur, sous…)', model:'« Tu pousses le gros ballon dans la boîte. »', act:'Jeux de cachette et de consignes spatiales ; albums avec lieux.'},
+  {n:6, syn:'Coordination', ex:'je prends le ballon et je le lance', vocab:'Connecteurs et, puis, après, mais', model:'« D\'abord…, après… » en montrant « après » sur le tableau', act:'Retour sur une activité avec des photos séquentielles.'},
+  {n:7, syn:'Subordination · récit', ex:'le cheval entre parce qu\'il cherche le roi', vocab:'parce que ; structure personnage → action → problème → résolution', model:'« Il pleure parce qu\'il a perdu son doudou. »', act:'Même album plusieurs jours, un objectif différent chaque jour.'},
+];
+const MOMENTS = [
+  {k:'habillage', t:'Habillage', ideas:['Donner une seule chaussure, attendre.','Commenter : « Tu mets le manteau. »','Verbes cibles : mettre, enlever, fermer, ouvrir.']},
+  {k:'jeu', t:'Jeu', ideas:['Jouet visible mais hors de portée.','Donner les pièces une à une.','Pause en pleine action → « encore ».']},
+  {k:'album', t:'Album', ids:[], ideas:["Commenter l'image plutôt que questionner.",'Même album plusieurs jours, un objectif différent.','Pointer les pictos pendant la lecture.']},
+  {k:'repas', t:'Repas / goûter', ideas:['Petites portions pour susciter « encore ».','Emballage fermé → « ouvre » / « aide ».','Choix entre deux aliments.']},
+  {k:'activite', t:'Activité de classe', ideas:['Matériel volontairement manquant (ciseaux, colle).','Choix de la couleur, de l\'outil.','Verbes cibles : couper, coller, mélanger.']},
+];
+
+function renderSection(){
+  document.querySelectorAll('#anav button').forEach(b=>b.classList.toggle('cur', b.dataset.sec===S.section));
+  const c=$('#acontent');
+  ({posture:secPosture, progression:secProgression, occasions:secOccasions, suivi:secSuivi, photos:secPhotos, reglages:secReglages, sources:secSources})[S.section](c);
+  c.scrollTop=0;
+}
+
+function secPosture(c){
+  c.innerHTML = `
+  <h1>Se positionner à côté de l'élève</h1>
+  <p class="lead">Le tableau est la voix de l'élève. L'adulte n'est pas un examinateur : il est un partenaire de communication qui parle lui-même avec le tableau, beaucoup, sans rien exiger.</p>
+  <div class="loop">
+    <div><span class="n">1</span><b>L'enfant produit</b>un regard, un geste, un mot, un picto, une écholalie.</div>
+    <div><span class="n">2</span><b>J'accueille</b>je réponds à l'intention, tout de suite.</div>
+    <div><span class="n">3</span><b>J'enrichis de +1</b>je reformule en ajoutant un seul élément, avec les pictos.</div>
+    <div><span class="n">4</span><b>Il peut réutiliser</b>j'attends, sans demander de répéter.</div>
+  </div>
+
+  <h2>Les six gestes</h2>
+  <div class="cols">
+    <div class="box"><h3>Modéliser sur le tableau</h3>
+      <span class="do">Faire :</span> pointer 1 à 3 pictos pendant que vous parlez, plusieurs fois par jour, dans toutes les activités.<br>
+      <span class="dont">Éviter :</span> prendre la main de l'enfant pour appuyer à sa place, ou exiger qu'il montre après vous.
+      <div class="ex">Vous dites « on <u>met</u> le <u>manteau</u> » en touchant <b>mettre</b> puis <b>manteau</b>. <span class="c">Bouton « ✋ Je modélise ».</span></div></div>
+    <div class="box"><h3>Suivre son intérêt</h3>
+      <span class="do">Faire :</span> parler de ce qu'il regarde, de ce qu'il fait, de ce qu'il aime.<br>
+      <span class="dont">Éviter :</span> ramener sans cesse vers la cible de la séance.
+      <div class="ex">Il aligne les voitures : « La voiture <u>roule</u>. Encore une voiture ! »</div></div>
+    <div class="box"><h3>Commenter plus que questionner</h3>
+      <span class="do">Faire :</span> viser environ trois commentaires pour une question.<br>
+      <span class="dont">Éviter :</span> « Qu'est-ce que c'est ? », « De quelle couleur ? » en rafale.
+      <div class="ex">Plutôt que « Il fait quoi ? » : « Oh ! Le garçon mange une pomme ! »</div></div>
+    <div class="box"><h3>Enrichir sans corriger</h3>
+      <span class="do">Faire :</span> reprendre sa phrase juste, avec un élément en plus.<br>
+      <span class="dont">Éviter :</span> « Non, on dit… », « Répète ».
+      <div class="ex">« chien dormir » → « Oui, le chien dort… dans son panier. »</div></div>
+    <div class="box"><h3>Attendre</h3>
+      <span class="do">Faire :</span> 5 à 10 secondes de silence, regard vers l'enfant, tableau ouvert devant lui.<br>
+      <span class="dont">Éviter :</span> reposer la question ou donner la réponse trop vite.
+      <div class="ex"><button class="btn sec" onclick="startWait()">⏳ Lancer une attente de 7 s</button></div></div>
+    <div class="box"><h3>Créer des occasions</h3>
+      <span class="do">Faire :</span> aménager l'environnement pour qu'il ait une raison de communiquer : objet hors de portée, petite portion, choix, pause dans une routine.<br>
+      <span class="dont">Éviter :</span> tout anticiper pour lui.
+      <div class="ex">Beaucoup de petites occasions valent mieux qu'une grosse séance de langage.</div></div>
+  </div>
+
+  <h2>Qui fait quoi ?</h2>
+  <table>
+    <tr><th></th><th>AESH</th><th>Enseignant·e</th></tr>
+    <tr><td><b>Rôle principal</b></td><td>Partenaire de communication au quotidien : garde le tableau à portée, modélise, répond, enrichit.</td><td>Conçoit les occasions dans chaque activité, fixe le niveau cible, observe et ajuste.</td></tr>
+    <tr><td><b>Pendant l'activité</b></td><td>Se place à côté (pas en face), tableau entre l'enfant et lui, modélise discrètement.</td><td>Modélise aussi devant le groupe : le tableau est l'outil de toute la classe, pas seulement de l'AESH.</td></tr>
+    <tr><td><b>Le suivi</b></td><td>Note quelques productions par jour (bouton « Noter »).</td><td>Lit le suivi chaque semaine, décide du passage au niveau suivant.</td></tr>
+    <tr><td><b>La généralisation</b></td><td>Utilise le tableau aussi en récréation, à la cantine, aux toilettes.</td><td>Fait le lien avec la famille et l'orthophoniste : mêmes pictos, mêmes phrases modèles.</td></tr>
+  </table>
+  <p class="lead" style="margin-top:8px">Répartition proposée à titre indicatif, à ajuster en équipe (enseignant, AESH, orthophoniste, famille).</p>
+
+  <h2>Même s'il parle</h2>
+  <div class="box prose">La CAA n'est pas réservée aux enfants sans langage oral. Montrer <b>je + veux + voiture</b> en disant « Je veux la voiture » donne à voir la structure de la phrase : le tableau devient un support de construction syntaxique, pas seulement un moyen de demander. La CAA ne freine pas l'émergence de la parole.</div>
+
+  <h2>L'écholalie</h2>
+  <div class="box prose">Une phrase répétée n'est pas un comportement à éteindre. Demandez-vous d'abord : <b>que veut-il me dire ?</b> Si l'enfant répète « On va au parc ? », répondez à l'intention probable et donnez le modèle : « Oui, <u>je veux aller</u> au parc. » Dans le suivi, notez-la en « Imitation / écholalie » : on regarde ensuite si des productions spontanées apparaissent.</div>
+
+  <div class="box note prose"><b>À propos du « langage gestaltiste » (GLP / méthode NLA).</b> Très présent sur les réseaux, ce modèle n'est pas validé à ce jour : une revue systématique fin 2024 n'a trouvé aucune étude empirique de son efficacité, et une analyse critique la même année juge ses « étapes » insuffisamment étayées. On peut partir des phrases toutes faites de l'enfant et chercher leur fonction, sans avoir besoin de cette catégorie.</div>
+
+  <h2>À propos du PODD</h2>
+  <div class="box prose">Le PODD (Pragmatic Organisation Dynamic Display, Gayle Porter) organise le vocabulaire en pages reliées, avec une page de <b>démarreurs</b> (« je veux », « j'ai quelque chose à dire », « je ne veux pas »…) qui mènent vers les pages de vocabulaire, et des <b>boutons de conduite</b> (« oups », « pas le mot », « page d'avant »). Cette application s'en inspire mais ne remplace pas le classeur PODD de l'élève : si l'élève en a un, gardez le classeur papier comme outil principal et utilisez les mêmes photos ici (rubrique « Mes pictos photo ») pour que les repères restent identiques.</div>`;
+}
+
+function secProgression(c){
+  const lv = settings.niveau;
+  c.innerHTML = `
+  <h1>Progression en deux colonnes</h1>
+  <p class="lead">Vocabulaire et syntaxe avancent en parallèle, pas en séances séparées : un mot nouveau est tout de suite utilisé dans une phrase modèle. Choisissez le niveau où l'élève produit déjà spontanément ; la cible est le niveau juste au-dessus.</p>
+  <div class="row noprint">Niveau actuel de ${settings.prenom||"l'élève"} :
+    ${LEVELS.map(l=>`<button class="lvlbtn ${l.n===lv?'on':''}" data-lv="${l.n}">${l.n}</button>`).join('')}</div>
+  <table style="margin-top:12px">
+    <tr><th>Niveau</th><th>Syntaxe</th><th>Vocabulaire associé</th><th>Modèle de l'adulte</th><th>Idée d'activité</th></tr>
+    ${LEVELS.map(l=>`<tr class="${l.n===lv+1?'target':''}"><td><b>${l.n}</b>${l.n===lv?'<br><small>actuel</small>':l.n===lv+1?'<br><small>cible</small>':''}</td>
+      <td><b>${l.syn}</b><br><span class="c">${l.ex}</span></td><td>${l.vocab}</td><td>${l.model}</td><td>${l.act}</td></tr>`).join('')}
+  </table>
+  <h2>Quand passer au niveau suivant ?</h2>
+  <div class="box prose">Quand l'élève produit ce type d'énoncé <b>spontanément</b> (pas seulement en réponse ou en imitation), avec <b>au moins deux adultes</b> et dans <b>au moins trois moments</b> différents (classe, récréation, repas, maison). La rubrique « Suivi » donne la longueur moyenne des productions et la part d'initiatives.</div>
+  <h2>Au-delà de la phrase</h2>
+  <div class="cols">
+    <div class="box"><h3>Communiquer pour…</h3>demander, commenter, refuser, choisir, raconter, questionner. Viser la diversité des fonctions, pas seulement la demande.</div>
+    <div class="box"><h3>Pragmatique</h3>initier, répondre, maintenir un échange de plusieurs tours (« à toi », « à moi »).</div>
+    <div class="box"><h3>Concepts</h3>dessus / dessous, grand / petit, avant / après, pareil / différent.</div>
+  </div>`;
+  c.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{ settings.niveau=+b.dataset.lv; save('settings',settings); secProgression(c); });
+}
+
+function secOccasions(c){
+  const d=cnt();
+  const total = Object.values(d.occ).reduce((a,b)=>a+b,0);
+  c.innerHTML = `
+  <h1>Occasions du jour</h1>
+  <p class="lead">Objectif : une dizaine de petites occasions de communication par moment. Touchez + à chaque échange où l'élève a eu une vraie raison de communiquer. Total aujourd'hui : <b>${total}</b>.</p>
+  <div class="cols">${MOMENTS.map(m=>`
+    <div class="moment"><h3>${m.t}</h3>
+      <div class="cnt"><button data-m="${m.k}" data-d="-1" aria-label="moins">−</button><span class="v">${d.occ[m.k]||0}</span><button data-m="${m.k}" data-d="1" aria-label="plus">+</button><span class="c">/ 10</span></div>
+      <div class="bar"><i style="width:${Math.min(100,(d.occ[m.k]||0)*10)}%"></i></div>
+      <ul>${m.ideas.map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('')}
+  </div>
+  <h2>Mes gestes d'adulte aujourd'hui</h2>
+  <p class="lead">Un auto-repère, pas une évaluation. Touchez la case correspondante après votre geste.</p>
+  <div class="selfcnt">
+    <button data-a="comment"><b>${d.ad.comment}</b>Commentaires</button>
+    <button data-a="question"><b>${d.ad.question}</b>Questions posées</button>
+    <button data-a="modele"><b>${d.ad.modele}</b>Modélisations sur le tableau</button>
+    <button data-a="enrichi"><b>${d.ad.enrichi}</b>Reformulations +1</button>
+    <button data-a="attente"><b>${d.ad.attente}</b>Attentes actives</button>
+  </div>
+  <p class="lead" style="margin-top:8px">${ratioMsg(d.ad)}</p>
+  <div class="row"><button class="btn sec" id="undoA">Annuler le dernier geste noté</button></div>`;
+  let lastA=null;
+  c.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ bump('occ',b.dataset.m,+b.dataset.d); secOccasions(c); });
+  c.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ bump('ad',b.dataset.a); c._last=b.dataset.a; const k=c._last; secOccasions(c); c._last=k; });
+  $('#undoA').onclick=()=>{ if(c._last){ bump('ad',c._last,-1); const k=c._last; secOccasions(c); c._last=null; toast('Annulé'); } };
+}
+function ratioMsg(a){
+  if(!a.comment && !a.question) return '';
+  if(a.question===0) return 'Que des commentaires pour l\'instant : très bien.';
+  const r=(a.comment/a.question);
+  return r>=3 ? `Environ ${r.toFixed(1)} commentaires pour une question : bon équilibre.`
+               : `Environ ${r.toFixed(1)} commentaire(s) pour une question : essayez de commenter davantage.`;
+}
+
+function secSuivi(c){
+  const d=today();
+  const child = logData.filter(x=>x.type!=='modele');
+  const td = child.filter(x=>x.d===d);
+  const mean = arr => arr.length ? (arr.reduce((a,x)=>a+x.n,0)/arr.length) : 0;
+  const pct = (arr,t) => arr.length ? Math.round(arr.filter(x=>x.type===t).length/arr.length*100) : 0;
+  const days=[]; for(let i=6;i>=0;i--){ const x=new Date(); x.setDate(x.getDate()-i); const k=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); days.push(k); }
+  const perDay = days.map(k=>{ const a=child.filter(x=>x.d===k); return {k, n:a.length, m:mean(a)}; });
+  const maxN = Math.max(1,...perDay.map(p=>p.n));
+  const fnCount = FNS.map(([k,l])=>[l, td.filter(x=>x.fn===k).length]).filter(x=>x[1]);
+  const modeles = logData.filter(x=>x.type==='modele'&&x.d===d).length;
+  c.innerHTML = `
+  <h1>Suivi ${settings.prenom?'de '+settings.prenom:''}</h1>
+  <p class="lead">On regarde surtout si les productions <b>spontanées</b> augmentent et s'allongent, dans des situations variées, plutôt que la réussite à un exercice.</p>
+  <div class="stats">
+    <div class="stat"><b>${td.length}</b><span>productions notées aujourd'hui</span></div>
+    <div class="stat"><b>${mean(td).toFixed(1)}</b><span>pictos par production (moyenne)</span></div>
+    <div class="stat"><b>${pct(td,'spont')} %</b><span>initiatives spontanées</span></div>
+    <div class="stat"><b>${modeles}</b><span>modèles de l'adulte notés</span></div>
+  </div>
+  <h2>7 derniers jours</h2>
+  <div class="week">${perDay.map(p=>`<div class="d"><b>${p.n||''}</b><i style="height:${p.n/maxN*80}%"></i>${p.k.slice(8)}/${p.k.slice(5,7)}<br>${p.n?p.m.toFixed(1)+' p.':''}</div>`).join('')}</div>
+  <p class="lead" style="margin-top:6px">Hauteur : nombre de productions. Sous la barre : longueur moyenne en pictos.</p>
+  ${fnCount.length?`<h2>Fonctions aujourd'hui</h2><p>${fnCount.map(([l,n])=>`${l} : <b>${n}</b>`).join(' · ')}</p>`:''}
+  <h2>Productions notées aujourd'hui</h2>
+  ${td.length?`<table class="log"><tr><th>Heure</th><th>Production</th><th>Pictos</th><th>Venue</th><th>Fonction</th></tr>
+    ${td.slice().reverse().map(x=>`<tr><td>${x.h}</td><td>${x.txt}</td><td>${x.n}</td><td>${(TYPES.find(t=>t[0]===x.type)||['',''])[1]}</td><td>${(FNS.find(f=>f[0]===x.fn)||['',''])[1]}</td></tr>`).join('')}</table>`
+    :'<p class="lead">Rien de noté aujourd\'hui. Après « 🔊 Dire », le panneau pour l\'adulte propose « Noter dans le suivi ».</p>'}
+  <div class="row noprint" style="margin-top:16px">
+    <button class="btn" id="copyB">Copier le bilan</button>
+    <button class="btn sec" onclick="window.print()">Imprimer</button>
+    <button class="btn danger" id="resetB">Effacer tout le suivi</button>
+  </div>
+  <h2>Synthèse de la semaine</h2>
+  <div class="row noprint"><button class="btn" id="synB" ${iaDispo()?'':'disabled'}>✨ Rédiger la synthèse avec Albert</button>
+    <span class="c">${iaDispo()?'Pour l\'équipe éducative ou l\'orthophoniste. Le prénom n\'est pas envoyé.':'Nécessite le réseau et Albert activé (Réglages).'}</span></div>
+  <div class="box synth" id="synT" ${c._synth?'':'hidden'}>${c._synth||''}</div>`;
+  $('#copyB').onclick=()=>{
+    const t = `Adaptparole — bilan du ${d.split('-').reverse().join('/')}${settings.prenom?' — '+settings.prenom:''}
+Productions : ${td.length} · longueur moyenne : ${mean(td).toFixed(1)} pictos · spontanées : ${pct(td,'spont')} %
+Modèles de l'adulte : ${modeles}
+${td.map(x=>`${x.h}  ${x.txt}  (${x.n})`).join('\n')}`;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Bilan copié')).catch(()=>toast('Copie impossible sur cet appareil'));
+  };
+  $('#synB').onclick=async()=>{
+    const semaine = logData.filter(x=>days.includes(x.d));
+    if(!semaine.length){ toast('Aucune production notée cette semaine'); return; }
+    const lignes = semaine.map(x=>`${x.d} ${x.h} | ${x.type==='modele'?'MODÈLE ADULTE':(TYPES.find(t=>t[0]===x.type)||['',''])[1]} | ${x.oral?'oral':'tableau'} | ${x.n} éléments | ${x.fn} | ${x.txt}`).join('\n');
+    const ad = days.map(k=>counters[k]).filter(Boolean).reduce((s,c)=>{ for(const k in c.ad) s[k]=(s[k]||0)+c.ad[k]; return s; },{});
+    const box=$('#synT'); box.hidden=false; box.textContent='Albert rédige la synthèse…';
+    try{
+      const t = await appelAlbert(`Tu es orthophoniste spécialiste de la CAA (PODD) et des interventions naturalistes auprès d'enfants autistes de maternelle. Tu rédiges une synthèse factuelle de 150 à 220 mots, en français, pour l'équipe éducative : évolution de la longueur des productions, part des initiatives spontanées, diversité des fonctions de communication, usage du tableau et de l'oral, gestes des adultes (modélisations, reformulations, attentes, rapport commentaires/questions). Termine par deux pistes concrètes pour la semaine suivante et le niveau syntaxique à viser. Aucun diagnostic, aucun jugement sur l'enfant, pas de titre, pas de liste à puces, pas de markdown.`,
+        `Niveau actuel choisi par l'équipe : ${settings.niveau} (${LEVELS[settings.niveau-1].syn}).\nGestes des adultes sur la semaine : ${JSON.stringify(ad)}\nProductions de la semaine :\n${lignes}`, false, 700);
+      c._synth = t.replace(/[*#]/g,''); box.textContent = c._synth;
+    }catch(e){ box.textContent = 'Synthèse impossible : '+e.message+'.'; }
+  };
+  $('#resetB').onclick=()=>{ if(confirm('Effacer toutes les productions et tous les compteurs ?')){ logData=[]; counters={}; save('log',logData); save('cnt',counters); secSuivi(c); } };
+}
+
+function secPhotos(c){
+  c.innerHTML = `
+  <h1>Mes pictos photo</h1>
+  <p class="lead">Ajoutez les photos des vrais objets, des lieux et des personnes de l'école, ou les pictos du classeur PODD de l'élève. Les photos restent sur cet appareil.</p>
+  <div class="box" style="max-width:640px">
+    <label class="f" for="cT">Mot affiché et prononcé</label><input type="text" id="cT" placeholder="ex. la piscine à balles">
+    <label class="f" for="cC">Sorte de mot (couleur)</label>
+    <select id="cC"><option value="nom">Chose / lieu (orange)</option><option value="pers">Personne (jaune)</option><option value="verbe">Action (vert)</option><option value="desc">Description (bleu)</option><option value="social">Mot social (rose)</option></select>
+    <div id="gBox"><label class="f" for="cG">Genre (pour les articles)</label><select id="cG"><option value="m">le / un</option><option value="f">la / une</option><option value="p">les</option></select></div>
+    <label class="f" for="cP">Page du tableau</label>
+    <select id="cP">${PAGES.filter(p=>p.id!=='accueil').map(p=>`<option value="${p.id}">${p.t}</option>`).join('')}</select>
+    <label class="f" for="cF">Photo</label><input type="file" id="cF" accept="image/*">
+    <div id="cPrev" style="margin:10px 0"></div>
+    <button class="btn" id="cAdd">Ajouter au tableau</button>
+  </div>
+  <div class="custlist">${custom.map(x=>`<div class="it"><img src="${x.img}" alt=""><div>${x.t}</div><button class="pill" data-del="${x.id}">Supprimer</button></div>`).join('')}</div>`;
+  let img=null;
+  $('#cC').onchange=()=>{ $('#gBox').hidden = $('#cC').value!=='nom'; };
+  $('#cF').onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{
+      const s=240, cv=document.createElement('canvas'); cv.width=cv.height=s; const x=cv.getContext('2d');
+      const m=Math.min(im.width,im.height); x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,s,s);
+      img=cv.toDataURL('image/jpeg',0.75); $('#cPrev').innerHTML=`<img src="${img}" style="width:120px;border-radius:12px">`;
+    }; im.src=r.result; }; r.readAsDataURL(f);
+  };
+  $('#cAdd').onclick=()=>{
+    const t=$('#cT').value.trim(); if(!t){ toast('Écrivez le mot'); return; } if(!img){ toast('Choisissez une photo'); return; }
+    custom.push({id:'c_'+Date.now(), t, cls:$('#cC').value, g:$('#cG').value, page:$('#cP').value, img});
+    save('custom',custom); registerCustom(); toast('Picto ajouté'); secPhotos(c);
+  };
+  c.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ custom=custom.filter(x=>x.id!==b.dataset.del); save('custom',custom); registerCustom(); secPhotos(c); });
+}
+
+function secReglages(c){
+  c.innerHTML = `
+  <h1>Réglages</h1>
+  <div class="box" style="max-width:640px">
+    <label class="f" for="rP">Prénom de l'élève</label><input type="text" id="rP" value="${settings.prenom}">
+    <label class="f" for="rT">Taille des images</label>
+    <select id="rT"><option value="s">Petites (plus de mots par page)</option><option value="m">Moyennes</option><option value="l">Grandes (motricité fine fragile)</option></select>
+    <label class="f" for="rR">Vitesse de la voix</label><input type="range" id="rR" min="0.6" max="1.2" step="0.05" value="${settings.rate}"> <button class="pill" id="rTest">Tester</button>
+    <label class="f"><input type="checkbox" id="rL" ${settings.lireToucher?'checked':''}> Prononcer chaque image au toucher</label>
+    <label class="f"><input type="checkbox" id="rA" ${settings.aideAdulte?'checked':''}> Afficher l'aide à l'adulte après « Dire »</label>
+    <label class="f"><input type="checkbox" id="rV" ${settings.verrou?'checked':''}> Appui long pour ouvrir l'espace adulte</label>
+  </div>
+  <div class="box" style="max-width:640px">
+    <h3>Albert, l'IA de l'État</h3>
+    <label class="f"><input type="checkbox" id="rI" ${settings.albert?'checked':''}> Utiliser Albert quand le réseau est disponible</label>
+    <label class="f" for="rU">Adresse du relais</label><input type="text" id="rU" value="${settings.relais}" style="width:100%" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <div class="row" style="margin-top:10px"><button class="btn sec" id="rIT">Tester la connexion</button><span id="rIE" class="c"></span></div>
+    <p class="c" style="margin-top:8px">La clé reste dans le relais Cloudflare, jamais sur l'appareil. Sans réseau, l'application utilise son moteur intégré.</p>
+  </div>
+  <p class="lead">Les données restent dans ce navigateur, sur cet appareil. L'application fonctionne hors connexion une fois la page ouverte.</p>`;
+  $('#rT').value=settings.taille;
+  const upd=()=>{ settings.prenom=$('#rP').value.trim(); settings.taille=$('#rT').value; settings.rate=+$('#rR').value;
+    settings.lireToucher=$('#rL').checked; settings.albert=$('#rI').checked; settings.relais=$('#rU').value.trim()||RELAIS_DEFAUT; settings.aideAdulte=$('#rA').checked; settings.verrou=$('#rV').checked; save('settings',settings); applySettings(); };
+  c.querySelectorAll('input,select').forEach(i=>i.addEventListener('change',upd));
+  $('#rIT').onclick=async()=>{ upd(); const e=$('#rIE');
+    if(!navigator.onLine){ e.textContent='Pas de réseau.'; return; }
+    e.textContent='Test en cours…';
+    try{ const r=await reponseAlbert('voiture rouler',['voiture','rouler'],false); e.textContent='✓ Albert répond : « '+r.reform+' »'; }
+    catch(x){ e.textContent='✗ '+x.message; } };
+  $('#rTest').onclick=()=>{ upd(); speak('Je veux la voiture rouge.'); };
+}
+
+function secSources(c){
+  c.innerHTML = `
+  <h1>Sur quoi s'appuie l'application</h1>
+  <ul class="src prose">
+    <li><b>Interventions naturalistes développementales et comportementales (NDBI, dont EMT et JASPER).</b> Méta-analyse récente (29 études, 517 enfants) : effets positifs sur le langage ; associer la CAA à l'intervention naturaliste tend à donner de meilleurs résultats chez les enfants au langage très limité.</li>
+    <li><b>Enhanced Milieu Teaching (EMT).</b> Suivre l'initiative de l'enfant, répondre avec le langage cible, reformuler en enrichissant, aménager l'environnement, utiliser modèles, délais et aides graduées.</li>
+    <li><b>NICE (Royaume-Uni).</b> Interventions de communication fondées sur le jeu, visant attention conjointe, engagement et réciprocité, adaptées au niveau de l'enfant et impliquant parents et enseignants.</li>
+    <li><b>ASHA, troubles du langage oral chez l'enfant d'âge préscolaire.</b> Élargir le vocabulaire (verbes, pronoms, connecteurs, concepts de base), allonger et complexifier les phrases, diversifier les types de phrases.</li>
+    <li><b>Écholalie.</b> Revue de 2025 : beaucoup d'interventions visaient à réduire l'écholalie, peu montraient une augmentation de la communication spontanée ; l'écholalie peut avoir une fonction communicative ou d'autorégulation.</li>
+    <li><b>GLP / NLA.</b> Revue systématique fin 2024 (18 bases, 3 registres d'essais) : aucune étude empirique d'efficacité ; analyse critique 2024 : modèle théorique insuffisamment étayé.</li>
+    <li><b>PODD</b> (Gayle Porter) : organisation pragmatique du vocabulaire. L'application s'inspire de ses principes sans reproduire un classeur PODD.</li>
+    <li><b>Code couleur</b> inspiré de la clé de Fitzgerald modifiée : personnes jaune, actions vert, descriptions bleu, choses orange, petits mots violet, mots sociaux rose.</li>
+  </ul>`;
+}
+
+/* ---------- démarrage ---------- */
+registerCustom(); applySettings(); renderPage(); renderStrip();
+</script>
+</body>
+</html>
