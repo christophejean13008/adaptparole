@@ -132,6 +132,10 @@ tr.target td{background:#FFF8DD}
 .selfcnt button b{font-size:1.5rem;display:block}
 label.f{display:block;font-weight:700;margin:10px 0 4px}
 input[type=text],select{font:inherit;padding:9px 10px;border-radius:10px;border:2px solid var(--line);background:#fff;min-width:220px}
+.tourrow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.tourrow input{flex:1;min-width:0;padding:7px 9px}
+.tourrow.ok input{background:#F2FAF1;border-color:var(--k-verbe)}
+.tourrow button{flex:0 0 auto}
 .custlist{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
 .custlist .it{width:130px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center;font-weight:700;font-size:.9rem}
 .custlist img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px}
@@ -641,13 +645,16 @@ function bump(group,key,delta=1){ const c=cnt(); c[group][key]=Math.max(0,(c[gro
 /* ---------- personnalisation ---------- */
 function registerCustom(){
   PAGES.forEach(p => p.items = p.items.filter(id=>!id.startsWith('c_')));
+  const tete = {};
   custom.forEach(c => {
-    W[c.id] = c.cls==='nom' ? {id:c.id,t:c.t,img:c.img,c:'nom',g:c.g||'m',adj:null}
+    W[c.id] = c.cls==='nom' ? {id:c.id,t:c.t,img:c.img,c:'nom',g:c.g||'m',adj:null,noArt:/^(le |la |les |l'|mon |ma |mes )/i.test(c.t)}
             : c.cls==='verbe' ? {id:c.id,t:c.t,img:c.img,c:'verbe'}
             : {id:c.id,t:c.t,img:c.img,c:c.cls,noArt:true};
-    const pg = PAGES.find(p=>p.id===c.page); if(pg && c.page!=='photos') pg.items.push(c.id);
+    const pg = PAGES.find(p=>p.id===c.page); if(!pg || c.page==='photos') return;
+    if(c.prio){ (tete[c.page] = tete[c.page] || []).push(c.id); } else pg.items.push(c.id);
   });
-  PAGES.find(p=>p.id==='photos').items = custom.map(c=>c.id);
+  for(const id in tete){ const pg=PAGES.find(p=>p.id===id); pg.items = tete[id].concat(pg.items); }
+  PAGES.find(p=>p.id==='photos').items = custom.slice().sort((a,b)=>(b.prio?1:0)-(a.prio?1:0)).map(c=>c.id);
 }
 function applySettings(){
   document.documentElement.style.setProperty('--tile', {s:'100px',m:'124px',l:'160px'}[settings.taille]||'124px');
@@ -1081,37 +1088,94 @@ ${td.map(x=>`${x.h}  ${x.txt}  (${x.n})`).join('\n')}`;
   $('#resetB').onclick=()=>{ if(confirm('Effacer toutes les productions et tous les compteurs ?')){ logData=[]; counters={}; save('log',logData); save('cnt',counters); secSuivi(c); } };
 }
 
+const TOUR = {
+  lieux: {page:'lieux', titre:"Les lieux de l'école", couleur:'nom', intro:"Photographiez chaque lieu tel que l'élève le voit en arrivant. Ces photos servent à demander, à anticiper et à se repérer.",
+    items:[["le coin regroupement","m"],["le coin jeux","m"],["le coin bibliothèque","m"],["les toilettes","p"],["la cour de récréation","f"],["le préau","m"],["la cantine","f"],["la salle de sieste","f"],["les porte-manteaux","p"],["la salle de motricité","f"],["le couloir","m"],["le bureau de la directrice","m"]]},
+  renfo: {page:'classe', titre:"Les renforçateurs identifiés", couleur:'nom', intro:"Photographiez ce que l'élève aime vraiment, tel que c'est rangé dans la classe. C'est ce qui lui donne une raison de communiquer.",
+    items:[["mon doudou","m"],["la tablette","f"],["les bulles","p"],["la piscine à balles","f"],["le trampoline","m"],["la balançoire","f"],["le puzzle préféré","m"],["la musique","f"],["le temps calme","m"]]}
+};
+
 function secPhotos(c){
+  const fait = t => custom.some(x=>x.t.toLowerCase()===t.toLowerCase());
+  const bloc = k => { const T=TOUR[k]; const n=T.items.filter(it=>fait(it[0])).length; return `
+    <div class="box" style="margin:0">
+      <div class="row" style="justify-content:space-between"><h3>${T.titre}</h3><span class="c">${n} / ${T.items.length}</span></div>
+      <div class="bar" style="margin:4px 0 10px"><i style="width:${n/T.items.length*100}%"></i></div>
+      <p class="tip">${T.intro}</p>
+      ${T.items.map((it,i)=>`<div class="tourrow ${fait(it[0])?'ok':''}">
+        <input type="text" value="${it[0]}" data-t="${k}:${i}" aria-label="mot du picto">
+        <button class="pill" data-shot="${k}:${i}">${fait(it[0])?'✓ refaire':'📷 photo'}</button></div>`).join('')}
+      <div class="row" style="margin-top:8px"><input type="text" placeholder="autre ${k==='lieux'?'lieu':'renforçateur'}…" data-t="${k}:libre" style="flex:1">
+        <button class="pill" data-shot="${k}:libre">📷 photo</button></div>
+    </div>`; };
+
   c.innerHTML = `
   <h1>Mes pictos photo</h1>
-  <p class="lead">Ajoutez les photos des vrais objets, des lieux et des personnes de l'école, ou les pictos du classeur PODD de l'élève. Les photos restent sur cet appareil.</p>
-  <div class="box" style="max-width:640px">
-    <label class="f" for="cT">Mot affiché et prononcé</label><input type="text" id="cT" placeholder="ex. la piscine à balles">
-    <label class="f" for="cC">Sorte de mot (couleur)</label>
-    <select id="cC"><option value="nom">Chose / lieu (orange)</option><option value="pers">Personne (jaune)</option><option value="verbe">Action (vert)</option><option value="desc">Description (bleu)</option><option value="social">Mot social (rose)</option></select>
-    <div id="gBox"><label class="f" for="cG">Genre (pour les articles)</label><select id="cG"><option value="m">le / un</option><option value="f">la / une</option><option value="p">les</option></select></div>
-    <label class="f" for="cP">Page du tableau</label>
-    <select id="cP">${PAGES.filter(p=>p.id!=='accueil').map(p=>`<option value="${p.id}">${p.t}</option>`).join('')}</select>
-    <label class="f" for="cF">Photo</label><input type="file" id="cF" accept="image/*">
-    <div id="cPrev" style="margin:10px 0"></div>
-    <button class="btn" id="cAdd">Ajouter au tableau</button>
+  <p class="lead">Les photos des vrais lieux et des vrais objets de l'école valent mieux que des dessins : l'élève reconnaît ce qu'il voit tous les jours. Tout reste sur cet appareil.</p>
+  <div class="cols" style="align-items:start">
+    <div class="box" style="margin:0">
+      <h3>Ajouter un picto</h3>
+      <label class="f" for="cT">Mot affiché et prononcé</label><input type="text" id="cT" placeholder="ex. la piscine à balles" style="width:100%">
+      <label class="f" for="cC">Sorte de mot (couleur)</label>
+      <select id="cC" style="width:100%"><option value="nom">Chose / lieu (orange)</option><option value="pers">Personne (jaune)</option><option value="verbe">Action (vert)</option><option value="desc">Description (bleu)</option><option value="social">Mot social (rose)</option></select>
+      <div id="gBox"><label class="f" for="cG">Genre (pour les articles)</label><select id="cG" style="width:100%"><option value="m">le / un</option><option value="f">la / une</option><option value="p">les</option></select></div>
+      <label class="f" for="cP">Page du tableau</label>
+      <select id="cP" style="width:100%">${PAGES.filter(p=>p.id!=='accueil').map(p=>`<option value="${p.id}">${p.t}</option>`).join('')}</select>
+      <label class="f" for="cF">Photo</label><input type="file" id="cF" accept="image/*">
+      <div id="cPrev" style="margin:10px 0"></div>
+      <button class="btn" id="cAdd">Ajouter au tableau</button>
+    </div>
+    <div>
+      <div class="box" style="margin:0 0 12px;border-color:var(--accent);background:var(--accent-soft)">
+        <h3>📸 Tour de l'école — AESH et enseignant·e</h3>
+        <p class="tip" style="color:var(--ink)">À faire une fois, en dix minutes, si possible avec l'élève : il vous accompagne et vous montre. Les pictos créés ici se placent <b>en premier</b> dans « Où ? » et dans « Classe », là où l'élève les cherchera.</p>
+      </div>
+      ${bloc('lieux')}
+      <div style="height:12px"></div>
+      ${bloc('renfo')}
+    </div>
   </div>
-  <div class="custlist">${custom.map(x=>`<div class="it"><img src="${x.img}" alt=""><div>${x.t}</div><button class="pill" data-del="${x.id}">Supprimer</button></div>`).join('')}</div>`;
+  <input type="file" id="tourF" accept="image/*" hidden>
+  <h2>Pictos déjà créés</h2>
+  ${custom.length?'':'<p class="lead">Aucun pour l\'instant.</p>'}
+  <div class="custlist">${custom.slice().sort((a,b)=>(b.prio?1:0)-(a.prio?1:0)).map(x=>`<div class="it"><img src="${x.img}" alt=""><div>${x.t}${x.prio?' <span class="c">·&nbsp;tour</span>':''}</div><button class="pill" data-del="${x.id}">Supprimer</button></div>`).join('')}</div>`;
+
   let img=null;
-  $('#cC').onchange=()=>{ $('#gBox').hidden = $('#cC').value!=='nom'; };
-  $('#cF').onchange=e=>{
-    const f=e.target.files[0]; if(!f) return;
+  const photo = (f, apres) => {
     const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{
       const s=240, cv=document.createElement('canvas'); cv.width=cv.height=s; const x=cv.getContext('2d');
       const m=Math.min(im.width,im.height); x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,s,s);
-      img=cv.toDataURL('image/jpeg',0.75); $('#cPrev').innerHTML=`<img src="${img}" style="width:120px;border-radius:12px">`;
+      apres(cv.toDataURL('image/jpeg',0.75));
     }; im.src=r.result; }; r.readAsDataURL(f);
   };
+
+  $('#cC').onchange=()=>{ $('#gBox').hidden = $('#cC').value!=='nom'; };
+  $('#cF').onchange=e=>{ const f=e.target.files[0]; if(f) photo(f, d=>{ img=d; $('#cPrev').innerHTML=`<img src="${img}" style="width:120px;border-radius:12px">`; }); };
   $('#cAdd').onclick=()=>{
     const t=$('#cT').value.trim(); if(!t){ toast('Écrivez le mot'); return; } if(!img){ toast('Choisissez une photo'); return; }
     custom.push({id:'c_'+Date.now(), t, cls:$('#cC').value, g:$('#cG').value, page:$('#cP').value, img});
     save('custom',custom); registerCustom(); toast('Picto ajouté'); secPhotos(c);
   };
+
+  // tour de l'école : une photo par ligne, ajoutée en tête de sa page
+  const champ = $('#tourF');
+  c.querySelectorAll('[data-shot]').forEach(b=>b.onclick=()=>{
+    const [k,i] = b.dataset.shot.split(':');
+    const saisie = c.querySelector(`[data-t="${k}:${i}"]`);
+    const t = saisie.value.trim();
+    if(!t){ toast('Écrivez le mot avant la photo'); return; }
+    const g = i==='libre' ? (/^les |^mes /i.test(t)?'p':/^la |^l'/i.test(t)?'f':'m') : TOUR[k].items[+i][1];
+    champ.value='';
+    champ.onchange = e => { const f=e.target.files[0]; if(!f) return;
+      photo(f, d=>{
+        custom = custom.filter(x=>x.t.toLowerCase()!==t.toLowerCase());
+        custom.unshift({id:'c_'+Date.now(), t, cls:'nom', g, page:TOUR[k].page, img:d, prio:1});
+        save('custom',custom); registerCustom(); toast(t+' : picto ajouté'); secPhotos(c);
+      });
+    };
+    champ.click();
+  });
+
   c.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ custom=custom.filter(x=>x.id!==b.dataset.del); save('custom',custom); registerCustom(); secPhotos(c); });
 }
 
