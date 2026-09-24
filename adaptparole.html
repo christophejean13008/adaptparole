@@ -186,7 +186,30 @@ textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radi
   .top,.anav,#viewEleve,.noprint{display:none!important}
   #viewAdulte{display:block!important}
   body{background:#fff}
+  body.printing > *{display:none!important}
+  body.printing #printout{display:block!important}
+  @page{size:A4;margin:8mm}
+  .psheet{page-break-after:always;break-after:page}
+  .psheet:last-child{page-break-after:auto}
 }
+#printout{display:none}
+.psheet{background:#fff;color:#000;padding:2mm 0 4mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.phead{display:flex;align-items:center;gap:4mm;border-bottom:1.2mm solid var(--k);padding-bottom:2mm;margin-bottom:3mm}
+.phead b{font-size:6mm}
+.phead .pnum{margin-left:auto;font-size:4mm;color:#444}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,var(--ps));gap:3mm;justify-content:start}
+.pcard{width:var(--ps);height:var(--ps);border:0.6mm solid #999;border-bottom:2mm solid var(--k);border-radius:3mm;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1mm;
+  font-weight:700;font-size:calc(var(--ps)*.13);line-height:1.1;background:#fff;overflow:hidden}
+.pcard .em{font-size:calc(var(--ps)*.42);line-height:1}
+.pcard img{width:60%;height:60%;object-fit:cover;border-radius:2mm}
+.pcard .pgo{font-size:calc(var(--ps)*.10);color:#333;font-weight:800}
+.pops{display:flex;gap:3mm;margin-top:4mm;border-top:0.4mm dashed #999;padding-top:3mm}
+.pops div{flex:1;border:0.6mm solid #000;border-radius:3mm;padding:2mm 1mm;text-align:center;font-weight:800;font-size:3.4mm}
+.pfoot{margin-top:3mm;font-size:3.2mm;color:#555;display:flex;justify-content:space-between}
+.apercu{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px;overflow:auto;max-height:70vh}
+.chk{display:flex;flex-wrap:wrap;gap:8px}
+.chk label{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:6px 10px;font-weight:700;font-size:.92rem}
 </style>
 </head>
 <body>
@@ -237,6 +260,7 @@ textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radi
     <button data-sec="occasions">Occasions du jour</button>
     <button data-sec="suivi">Suivi</button>
     <button data-sec="photos">Mes pictos photo</button>
+    <button data-sec="impression">Imprimer le classeur</button>
     <button data-sec="reglages">Réglages</button>
     <button data-sec="sources">Sources</button>
   </nav>
@@ -255,6 +279,7 @@ textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radi
     <button class="btn sec" id="waitEnd">Fermer</button>
   </div>
 </div>
+<div id="printout"></div>
 <div id="toast"></div>
 
 <script id="logic">
@@ -633,7 +658,7 @@ const hm = () => { const d=new Date(); return String(d.getHours()).padStart(2,'0
 
 const RELAIS_DEFAUT = 'https://adaptedl-relais.chris333j.workers.dev';
 const MODELES_ALBERT = ['Mistral-Small-3.2-24B','openweight-medium'];
-let settings = Object.assign({prenom:'', niveau:2, taille:'m', lireToucher:true, aideAdulte:true, verrou:true, rate:0.9, albert:true, relais:RELAIS_DEFAUT}, load('settings',{}));
+let settings = Object.assign({prenom:'', niveau:2, taille:'m', lireToucher:true, aideAdulte:true, verrou:true, rate:0.9, albert:true, relais:RELAIS_DEFAUT, imp:{mm:42, ops:true, fleches:true, pages:null}}, load('settings',{}));
 let logData = load('log', []);
 let counters = load('cnt', {});
 let custom = load('custom', []);
@@ -905,7 +930,7 @@ const MOMENTS = [
 function renderSection(){
   document.querySelectorAll('#anav button').forEach(b=>b.classList.toggle('cur', b.dataset.sec===S.section));
   const c=$('#acontent');
-  ({posture:secPosture, progression:secProgression, occasions:secOccasions, suivi:secSuivi, photos:secPhotos, reglages:secReglages, sources:secSources})[S.section](c);
+  ({posture:secPosture, progression:secProgression, occasions:secOccasions, suivi:secSuivi, photos:secPhotos, impression:secImpression, reglages:secReglages, sources:secSources})[S.section](c);
   c.scrollTop=0;
 }
 
@@ -1177,6 +1202,68 @@ function secPhotos(c){
   });
 
   c.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ custom=custom.filter(x=>x.id!==b.dataset.del); save('custom',custom); registerCustom(); secPhotos(c); });
+}
+
+const OPS_PRINT = ['🏠 Début','↩️ Page d\'avant','🙊 Oups, erreur','🤔 Pas le mot','🔀 Autre chose'];
+
+function feuilles(){
+  const I = settings.imp;
+  const choisies = I.pages || PAGES.filter(p=>p.id!=='photos'||custom.length).map(p=>p.id);
+  const pages = PAGES.filter(p=>choisies.includes(p.id) && p.items.length);
+  return pages.map((p,i) => {
+    const cartes = p.items.map(id=>{ const w=W[id]; if(!w) return '';
+      const cible = w.go ? (PAGES.find(x=>x.id===w.go)||{}).t : null;
+      const vis = w.img ? `<img src="${w.img}" alt="">` : `<span class="em">${w.e||''}</span>`;
+      return `<div class="pcard c-${w.c}">${vis}<span>${w.t}</span>${(cible&&I.fleches)?`<span class="pgo">→ ${cible}</span>`:''}</div>`;
+    }).join('');
+    return `<section class="psheet c-${p.c==='prag'?'pers':p.c}">
+      <div class="phead"><b>${p.t}</b><span class="pnum">page ${i+1} / ${pages.length}</span></div>
+      <div class="pgrid">${cartes}</div>
+      ${I.ops?`<div class="pops">${OPS_PRINT.map(o=>`<div>${o}</div>`).join('')}</div>`:''}
+      <div class="pfoot"><span>Adaptparole${settings.prenom?' · classeur de '+settings.prenom:''}</span><span>${p.t}</span></div>
+    </section>`;
+  }).join('');
+}
+
+function secImpression(c){
+  const I = settings.imp;
+  const choisies = I.pages || PAGES.filter(p=>p.id!=='photos'||custom.length).map(p=>p.id);
+  const parLigne = Math.max(1, Math.floor(194/(I.mm+3)));
+  c.innerHTML = `
+  <h1>Imprimer le classeur</h1>
+  <p class="lead">Une feuille A4 par page du tableau, dans le même ordre et avec les mêmes couleurs que l'écran. À plastifier et à relier : l'élève garde ainsi le même outil quand l'iPad est éteint, en récréation ou à la cantine.</p>
+  <div class="box" style="max-width:700px">
+    <label class="f" for="pS">Taille des images : <b id="pSv">${I.mm} mm</b> de côté — environ ${parLigne} par ligne</label>
+    <input type="range" id="pS" min="25" max="70" step="1" value="${I.mm}" style="width:100%">
+    <div class="row"><button class="lvlbtn" data-mm="32">Petites 32 mm</button><button class="lvlbtn" data-mm="42">Moyennes 42 mm</button><button class="lvlbtn" data-mm="55">Grandes 55 mm</button></div>
+    <label class="f"><input type="checkbox" id="pO" ${I.ops?'checked':''}> Bandeau des boutons de conduite en bas de chaque feuille</label>
+    <label class="f"><input type="checkbox" id="pF" ${I.fleches?'checked':''}> Indiquer vers quelle page mène un démarreur (→ Jouer)</label>
+    <label class="f">Pages à imprimer</label>
+    <div class="chk">${PAGES.filter(p=>p.id!=='photos'||custom.length).map(p=>
+      `<label><input type="checkbox" data-pg="${p.id}" ${choisies.includes(p.id)?'checked':''}> ${p.t} <span class="c">(${p.items.length})</span></label>`).join('')}</div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="pGo">Imprimer</button><button class="btn sec" id="pAll">Tout cocher</button><button class="btn sec" id="pNone">Tout décocher</button></div>
+    <p class="c" style="margin-top:8px">Dans la fenêtre d'impression, laissez les marges par défaut et activez « graphiques d'arrière-plan » pour conserver les couleurs.</p>
+  </div>
+  <h2>Aperçu</h2>
+  <div class="apercu" id="pPrev" style="--ps:${I.mm}mm"></div>`;
+  const maj = () => { settings.imp=I; save('settings',settings); $('#pSv').textContent=I.mm+' mm';
+    $('#pPrev').style.setProperty('--ps', I.mm+'mm'); $('#pPrev').innerHTML=feuilles(); };
+  $('#pS').oninput = e => { I.mm=+e.target.value; maj(); };
+  c.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{ I.mm=+b.dataset.mm; $('#pS').value=I.mm; maj(); secImpression(c); });
+  $('#pO').onchange = e => { I.ops=e.target.checked; maj(); };
+  $('#pF').onchange = e => { I.fleches=e.target.checked; maj(); };
+  const lire = () => { I.pages=[...c.querySelectorAll('[data-pg]')].filter(x=>x.checked).map(x=>x.dataset.pg); maj(); };
+  c.querySelectorAll('[data-pg]').forEach(x=>x.onchange=lire);
+  $('#pAll').onclick=()=>{ c.querySelectorAll('[data-pg]').forEach(x=>x.checked=true); lire(); };
+  $('#pNone').onclick=()=>{ c.querySelectorAll('[data-pg]').forEach(x=>x.checked=false); lire(); };
+  $('#pGo').onclick=()=>{
+    if(!(I.pages||[1]).length){ toast('Cochez au moins une page'); return; }
+    $('#printout').style.setProperty('--ps', I.mm+'mm');
+    $('#printout').innerHTML = feuilles();
+    document.body.classList.add('printing');
+    setTimeout(()=>{ window.print(); setTimeout(()=>document.body.classList.remove('printing'),500); }, 150);
+  };
+  maj();
 }
 
 function secReglages(c){
