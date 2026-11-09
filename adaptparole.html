@@ -50,6 +50,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .strip-btns button{width:78px;border-radius:18px;background:var(--panel);border:3px solid var(--line);font-size:1.6rem;font-weight:800}
 .strip-btns .say{width:110px;background:var(--ink);color:#fff;border-color:var(--ink);font-size:1.15rem}
 
+#souffleur{margin:0 12px 8px;display:flex;gap:12px;align-items:flex-start;background:#F6F8F9;border:2px dashed var(--line);border-radius:14px;padding:7px 12px;color:var(--ink2);font-size:.92rem;line-height:1.35}
+#souffleur .lab{font-weight:800;color:var(--ink2);font-size:.74rem;letter-spacing:.04em;text-transform:uppercase}
+#souffleur .ph{color:var(--ink);font-weight:700}
+#souffleur .col{flex:1;min-width:0}
+#souffleur .tipx{flex:1.1;min-width:0;font-size:.86rem;font-style:italic}
 .board{flex:1;display:grid;grid-template-columns:118px 1fr 132px;gap:10px;padding:0 12px 12px;min-height:0}
 .ops{display:flex;flex-direction:column;gap:8px}
 .ops button{flex:1;max-height:110px;border-radius:16px;background:var(--panel);border:3px solid var(--ink);font-weight:800;font-size:.9rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px}
@@ -168,6 +173,8 @@ textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radi
 
 @media (max-width:820px){
   .board{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+  #souffleur{flex-direction:column;gap:4px}
+  #souffleur .tipx{display:none}
   .ops{flex-direction:row;overflow-x:auto}
   .ops button{min-width:84px;max-height:none;height:70px;flex:0 0 auto}
   .tabs{flex-direction:row;overflow-x:auto}
@@ -220,6 +227,7 @@ textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radi
     Adaptparole <small id="who"></small>
   </div>
   <button class="tbtn" id="btnWait" title="Minuteur d'attente active">⏳ J'attends</button>
+  <button class="tbtn" id="btnSouf" title="Bandeau d'aide pendant que l'élève compose">👁️ Souffleur</button>
   <button class="tbtn" id="btnOral" title="Noter une phrase dite à l'oral">💬 Il a dit…</button>
   <button class="tbtn" id="btnModel" title="L'adulte montre les pictos en parlant">✋ Je modélise</button>
   <button class="tbtn hold" id="btnAdult"><span class="fill"></span><span class="lbl">Espace adulte</span></button>
@@ -236,6 +244,7 @@ textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radi
       <button id="bClear" aria-label="Tout effacer">✕</button>
     </div>
   </div>
+  <div id="souffleur" hidden></div>
   <div class="board">
     <nav class="ops" aria-label="Boutons de conduite">
       <button id="oHome"><span class="em">🏠</span>Début</button>
@@ -658,7 +667,7 @@ const hm = () => { const d=new Date(); return String(d.getHours()).padStart(2,'0
 
 const RELAIS_DEFAUT = 'https://adaptedl-relais.chris333j.workers.dev';
 const MODELES_ALBERT = ['Mistral-Small-3.2-24B','openweight-medium'];
-let settings = Object.assign({prenom:'', niveau:2, taille:'m', lireToucher:true, aideAdulte:true, verrou:true, rate:0.9, albert:true, relais:RELAIS_DEFAUT, imp:{mm:42, ops:true, fleches:true, pages:null}}, load('settings',{}));
+let settings = Object.assign({prenom:'', niveau:2, taille:'m', lireToucher:true, aideAdulte:true, verrou:true, rate:0.9, souffleur:true, albert:true, relais:RELAIS_DEFAUT, imp:{mm:42, ops:true, fleches:true, pages:null}}, load('settings',{}));
 let logData = load('log', []);
 let counters = load('cnt', {});
 let custom = load('custom', []);
@@ -682,6 +691,7 @@ function registerCustom(){
   PAGES.find(p=>p.id==='photos').items = custom.slice().sort((a,b)=>(b.prio?1:0)-(a.prio?1:0)).map(c=>c.id);
 }
 function applySettings(){
+  $('#btnSouf').classList.toggle('on', settings.souffleur);
   document.documentElement.style.setProperty('--tile', {s:'100px',m:'124px',l:'160px'}[settings.taille]||'124px');
   $('#who').textContent = settings.prenom ? '· tableau de '+settings.prenom : '';
 }
@@ -719,11 +729,23 @@ function goPage(id, remember=true){ if(id===S.page) return; if(remember) S.hist.
 function renderStrip(){
   const st=$('#strip');
   st.classList.toggle('model', S.modeling);
-  if(!S.strip.length){ st.innerHTML = `<span class="empty">${S.modeling?'Mode modélisation : touchez les pictos en parlant.':'Touche les images pour faire ta phrase.'}</span>`; return; }
+  if(!S.strip.length){ st.innerHTML = `<span class="empty">${S.modeling?'Mode modélisation : touchez les pictos en parlant.':'Touche les images pour faire ta phrase.'}</span>`; renderSouffleur(); return; }
+  renderSouffleur();
   st.innerHTML = S.strip.map(id=>{ const w=W[id]; return `<span class="chip c-${w.c}">${w.img?`<img src="${w.img}" alt="">`:`<span class="em">${w.e}</span>`}${w.t}</span>`; }).join('')
     + `<span class="said">« ${cap(textOf(S.strip))} »</span>`;
   st.scrollLeft = st.scrollWidth;
 }
+function renderSouffleur(){
+  const box=$('#souffleur');
+  if(!settings.souffleur || S.modeling || !S.strip.length){ box.hidden=true; return; }
+  const r = respond(S.strip);
+  box.hidden=false;
+  box.innerHTML = `
+    <div class="col"><span class="lab">J'accueille</span><br><span class="ph">${r.reform?'\u00ab '+r.reform+' \u00bb':'\u2014'}</span></div>
+    <div class="col"><span class="lab">J'enrichis +1</span><br><span class="ph">${r.plus?'\u00ab '+r.plus+' \u00bb':'\u2014'}</span></div>
+    <div class="tipx">${r.tip||''}</div>`;
+}
+
 function tapWord(id){
   const w=W[id]; if(!w) return;
   if(S.spoken){ S.strip=[]; S.spoken=false; }
@@ -886,6 +908,11 @@ $('#waitEnd').onclick = stopWait;
 $('#waitStop').onclick = () => { stopWait(); toast("Bravo : l'attente a laissé la place à l'enfant."); };
 
 /* ---------- modélisation ---------- */
+$('#btnSouf').onclick = () => {
+  settings.souffleur=!settings.souffleur; save('settings',settings);
+  $('#btnSouf').classList.toggle('on',settings.souffleur); renderSouffleur();
+};
+
 $('#btnModel').onclick = () => {
   S.modeling=!S.modeling; $('#btnModel').classList.toggle('on',S.modeling);
   $('#pageBox').classList.toggle('modelmode',S.modeling);
@@ -901,8 +928,8 @@ $('#btnModel').onclick = () => {
   b.addEventListener('pointerdown', start); b.addEventListener('pointerup', end); b.addEventListener('pointerleave', end); b.addEventListener('pointercancel', end);
   b.addEventListener('click', e => { if(!settings.verrou) return; if(!b.classList.contains('pressing')) toast("Appui long pour ouvrir l'espace adulte"); });
 })();
-function openAdult(){ $('#viewEleve').hidden=true; $('#viewAdulte').hidden=false; $('#btnAdult').hidden=true; $('#btnModel').hidden=true; $('#btnOral').hidden=true; $('#btnBoard').hidden=false; $('#sheet').hidden=true; renderSection(); }
-$('#btnBoard').onclick = () => { $('#viewEleve').hidden=false; $('#viewAdulte').hidden=true; $('#btnAdult').hidden=false; $('#btnModel').hidden=false; $('#btnOral').hidden=false; $('#btnBoard').hidden=true; registerCustom(); renderPage(); };
+function openAdult(){ $('#viewEleve').hidden=true; $('#viewAdulte').hidden=false; $('#btnAdult').hidden=true; $('#btnModel').hidden=true; $('#btnOral').hidden=true; $('#btnSouf').hidden=true; $('#souffleur').hidden=true; $('#btnBoard').hidden=false; $('#sheet').hidden=true; renderSection(); }
+$('#btnBoard').onclick = () => { $('#viewEleve').hidden=false; $('#viewAdulte').hidden=true; $('#btnAdult').hidden=false; $('#btnModel').hidden=false; $('#btnOral').hidden=false; $('#btnSouf').hidden=false; renderSouffleur(); $('#btnBoard').hidden=true; registerCustom(); renderPage(); };
 $('#anav').addEventListener('click', e => { const b=e.target.closest('button'); if(b){ S.section=b.dataset.sec; renderSection(); } });
 
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1800); }
@@ -1276,6 +1303,7 @@ function secReglages(c){
     <label class="f" for="rR">Vitesse de la voix</label><input type="range" id="rR" min="0.6" max="1.2" step="0.05" value="${settings.rate}"> <button class="pill" id="rTest">Tester</button>
     <label class="f"><input type="checkbox" id="rL" ${settings.lireToucher?'checked':''}> Prononcer chaque image au toucher</label>
     <label class="f"><input type="checkbox" id="rA" ${settings.aideAdulte?'checked':''}> Afficher l'aide à l'adulte après « Dire »</label>
+    <label class="f"><input type="checkbox" id="rSf" ${settings.souffleur?'checked':''}> Bandeau souffleur pendant que l'élève compose</label>
     <label class="f"><input type="checkbox" id="rV" ${settings.verrou?'checked':''}> Appui long pour ouvrir l'espace adulte</label>
   </div>
   <div class="box" style="max-width:640px">
@@ -1288,7 +1316,7 @@ function secReglages(c){
   <p class="lead">Les données restent dans ce navigateur, sur cet appareil. L'application fonctionne hors connexion une fois la page ouverte.</p>`;
   $('#rT').value=settings.taille;
   const upd=()=>{ settings.prenom=$('#rP').value.trim(); settings.taille=$('#rT').value; settings.rate=+$('#rR').value;
-    settings.lireToucher=$('#rL').checked; settings.albert=$('#rI').checked; settings.relais=$('#rU').value.trim()||RELAIS_DEFAUT; settings.aideAdulte=$('#rA').checked; settings.verrou=$('#rV').checked; save('settings',settings); applySettings(); };
+    settings.lireToucher=$('#rL').checked; settings.albert=$('#rI').checked; settings.relais=$('#rU').value.trim()||RELAIS_DEFAUT; settings.aideAdulte=$('#rA').checked; settings.souffleur=$('#rSf').checked; settings.verrou=$('#rV').checked; save('settings',settings); applySettings(); };
   c.querySelectorAll('input,select').forEach(i=>i.addEventListener('change',upd));
   $('#rIT').onclick=async()=>{ upd(); const e=$('#rIE');
     if(!navigator.onLine){ e.textContent='Pas de réseau.'; return; }
