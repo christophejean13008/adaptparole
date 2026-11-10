@@ -73,13 +73,57 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .tile:active,.tile.flash{transform:scale(.95)}
 .tile.prag{background:#fff;border:3px solid var(--ink);border-bottom-width:8px}
 .tabs{display:flex;flex-direction:column;gap:5px;overflow:auto}
+.tabs button .tico{font-size:1.5rem;line-height:1}
+.tabs button .tnom{font-size:.84rem;line-height:1.1}
+/* --- onglets : miniature de la page, et non une seule image ---
+   Light & Drager : sur la page de menu, une vignette de la page elle-meme est
+   le repere le plus fiable pour un jeune enfant ; choisir la page lui est plus
+   difficile que trouver l'image une fois dedans. */
+.tabs button .tmini{display:grid;grid-template-columns:1fr 1fr;gap:1px;width:34px;height:34px;flex:0 0 auto;
+  border-radius:7px;overflow:hidden;background:rgba(0,0,0,.06);padding:1px}
+.tabs button .tmini i{display:grid;place-items:center;font-size:12px;font-style:normal;line-height:1;background:#fff;border-radius:3px;overflow:hidden}
+.tabs button .tmini i img{width:100%;height:100%;object-fit:cover}
+.tabs button{align-items:center;gap:7px}
+/* --- separation des groupes de couleur dans une page --- */
+.grid .sep{grid-column:1/-1;height:6px}
+/* --- scenes (photos parlantes) --- */
+.scene{position:relative;width:min(100%, calc(48vh * var(--ar,1.5)));margin:0 auto;border-radius:16px;overflow:hidden;background:#111;line-height:0}
+.scene img{width:100%;display:block}
+/* La cible est transparente : l'objet photographie reste visible.
+   Le mot s'ecrit juste en dessous, sur une etiquette lisible. */
+.pt{position:absolute;transform:translate(-50%,-50%);width:92px;height:92px;border-radius:50%;
+  background:rgba(255,255,255,.18);border:4px solid rgba(255,255,255,.92);
+  box-shadow:0 0 0 3px rgba(30,43,54,.55);padding:0}
+.pt .lb{position:absolute;left:50%;top:calc(100% + 7px);transform:translateX(-50%);white-space:nowrap;
+  background:#fff;border:3px solid var(--ink);border-bottom-width:5px;border-radius:12px;padding:4px 10px;
+  font-weight:800;font-size:.86rem;line-height:1.1;color:var(--ink)}
+.pt:active{transform:translate(-50%,-50%) scale(.93)}
+.pt.bas .lb{top:auto;bottom:calc(100% + 7px)}
+.pt.edit{border-color:var(--accent);background:rgba(44,110,138,.18)}
+.scnav{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px}
+.scnav button{flex:0 0 auto;width:110px;border-radius:12px;overflow:hidden;border:3px solid var(--line);background:var(--panel);padding:0}
+.scnav button.cur{border-color:var(--ink)}
+.scnav button img{width:100%;height:66px;object-fit:cover;display:block}
+.scnav button span{display:block;padding:4px 6px;font-weight:800;font-size:.78rem}
+.scvide{color:var(--ink2);padding:10px}
+.ptlist{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ptlist .pitem{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:6px 10px;font-weight:700;font-size:.9rem;display:flex;gap:8px;align-items:center}
+.fixes{display:flex;gap:8px;margin-top:auto;padding-top:10px;border-top:2px dashed var(--line);flex-wrap:wrap}
+.fixes .fixe.c-prag{background:#fff;border:3px solid var(--ink);border-bottom-width:7px}
+.fixes .fixe{flex:1 1 0;min-width:72px;border-radius:14px;padding:6px 4px;font-weight:800;font-size:.8rem;
+  display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid rgba(0,0,0,.12);border-bottom-width:6px;line-height:1.05}
+.fixes .fixe .em{font-size:1.5rem;line-height:1}
+.fixes .fixe:active{transform:scale(.95)}
+.fixes .fixe[class*="c-"]:not(.c-prag){background:color-mix(in srgb,var(--k) 38%,#fff);border-bottom-color:var(--k)}
+.page{display:flex;flex-direction:column}
+.page .grid{flex:0 0 auto}
 .tabs button{text-align:left;padding:8px 10px;border-radius:12px 0 0 12px;font-weight:800;font-size:.85rem;display:flex;align-items:center;gap:6px;border-left:8px solid;background:var(--panel);min-height:40px}
 .tabs button.cur{margin-left:-10px;box-shadow:inset 0 0 0 3px var(--ink)}
 
 /* couleurs de la clé */
 .c-pers{--k:var(--k-pers)} .c-verbe{--k:var(--k-verbe)} .c-desc{--k:var(--k-desc)} .c-nom{--k:var(--k-nom)}
 .c-mot{--k:var(--k-mot)} .c-social{--k:var(--k-social)} .c-quest{--k:var(--k-quest)} .c-prag{--k:var(--ink)}
-.tile[class*="c-"]:not(.prag){background:color-mix(in srgb,var(--k) 38%,#fff);border-bottom-color:var(--k)}
+.tile[class*="c-"]:not(.prag){background:color-mix(in srgb,var(--k) 20%,#fff);border-bottom-color:var(--k);border-left:5px solid var(--k)}
 .chip[class*="c-"]{background:color-mix(in srgb,var(--k) 38%,#fff);border-bottom-color:var(--k)}
 .chip.c-prag{background:#fff;border:2px solid var(--ink);border-bottom-width:6px}
 .tabs button[class*="c-"]{border-left-color:var(--k)}
@@ -114,6 +158,17 @@ table{border-collapse:collapse;width:100%;background:var(--panel);border-radius:
 th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
 th{background:var(--accent-soft)}
 tr.target td{background:#FFF8DD}
+.palchoix{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:10px 0}
+.palchoix button{text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+.palchoix button.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.palchoix b{display:block;font-size:1.05rem}
+.palchoix .n{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:.8rem;margin-bottom:6px}
+.palchoix .s{color:var(--ink2);font-size:.86rem;display:block;margin:2px 0 6px}
+.palchoix p{margin:0;font-size:.9rem;color:var(--ink2)}
+.apercu-ong{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.apercu-ong span{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:10px;background:var(--panel);
+  border:2px solid var(--line);border-left:7px solid var(--k);font-weight:700;font-size:.88rem}
+.apercu-ong span.neuf{border-color:var(--accent);border-left-color:var(--k)}
 .lvlbtn{padding:6px 12px;border-radius:10px;border:2px solid var(--line);font-weight:800;background:var(--panel)}
 .lvlbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .btn{padding:10px 16px;border-radius:12px;background:var(--accent);color:#fff;font-weight:800}
@@ -142,6 +197,7 @@ label.f{display:block;font-weight:700;margin:10px 0 4px}
 input[type=text],select{font:inherit;padding:9px 10px;border-radius:10px;border:2px solid var(--line);background:#fff;min-width:220px}
 .tourrow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
 .tourrow input{flex:1;min-width:0;padding:7px 9px}
+.tourrow [data-rm]{padding:7px 9px;color:var(--warn)}
 .tourrow.ok input{background:#F2FAF1;border-color:var(--k-verbe)}
 .tourrow button{flex:0 0 auto}
 .custlist{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
@@ -181,7 +237,8 @@ textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radi
   .ops{flex-direction:row;overflow-x:auto}
   .ops button{min-width:84px;max-height:none;height:70px;flex:0 0 auto}
   .tabs{flex-direction:row;overflow-x:auto}
-  .tabs button{border-radius:12px;border-left-width:0;border-top:6px solid;border-top-color:var(--k);flex:0 0 auto}
+  .tabs button{border-radius:12px;border-left-width:0;border-top:6px solid;border-top-color:var(--k);flex:0 0 auto;flex-direction:column;align-items:center;gap:0;min-width:64px}
+  .fixes .fixe{min-width:64px;font-size:.72rem}
   .tabs button.cur{margin:0}
   .strip-btns button{width:56px}.strip-btns .say{width:80px}
   #viewAdulte{grid-template-columns:1fr;grid-template-rows:auto 1fr}
@@ -259,6 +316,7 @@ textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radi
     <div class="page" id="pageBox">
       <h2 id="pageTitle"></h2>
       <div id="grid" class="grid"></div>
+      <div id="fixes" class="fixes" aria-label="Mots toujours disponibles"></div>
     </div>
     <nav id="tabs" class="tabs" aria-label="Pages du tableau"></nav>
   </div>
@@ -271,6 +329,7 @@ textarea.oral{width:100%;font:inherit;font-size:1.15rem;padding:10px;border-radi
     <button data-sec="progression">Progression</button>
     <button data-sec="occasions">Occasions du jour</button>
     <button data-sec="suivi">Suivi</button>
+    <button data-sec="scenes">Mes scènes</button>
     <button data-sec="photos">Mes pictos photo</button>
     <button data-sec="impression">Imprimer le classeur</button>
     <button data-sec="reglages">Réglages</button>
@@ -454,21 +513,50 @@ add('prag', [
   {id:'p_mal', t:"j'ai mal", e:'🤕', fn:'commenter'},
 ]);
 
+/* Organisation evolutive du tableau.
+   pal = palier a partir duquel l'onglet apparait. Regle de coherence :
+   un onglet ne change jamais de place, de couleur ni d'image quand on monte
+   d'un palier ; on ne fait qu'en ajouter. Ce que l'eleve a appris reste vrai. */
+add('prag', [
+  {id:'g_jouets', t:'les jouets', e:'🚗', go:'jouets'},
+  {id:'g_manger', t:'à manger',   e:'🍎', go:'manger'},
+  {id:'g_classe', t:'la classe',  e:'✏️', go:'classe'},
+]);
+
 const PAGES = [
-  {id:'accueil', t:'Début', c:'prag', items:['p_veux','p_nonveux','p_aide','p_dire','p_regarde','p_sens','p_question','p_joue','p_pause','p_fini','p_arrete','p_mal']},
-  {id:'personnes', t:'Personnes', c:'pers', items:['je','tu','il','elle','on','maitresse','maitre','aesh','copain','copine','maman','papa']},
-  {id:'actions', t:'Actions', c:'verbe', items:['vouloir','aller','aimer','pouvoir','etre','courir','pousser','tirer','ouvrir','fermer','prendre','donner','tomber','mettre','enlever','chercher','regarder','attendre','couper','melanger','manger','boire','jouer','dormir','rouler','lancer','dessiner','lire','laver','aider','faire','finir']},
-  {id:'jouets', t:'Jouer', c:'nom', items:['voiture','ballon','cubes','poupee','train','puzzle','doudou','bulles','pate','toboggan','balancoire','livre']},
-  {id:'manger', t:'Manger', c:'nom', items:['pomme','banane','gateau','pain','yaourt','compote','biscuit','eau','lait']},
-  {id:'classe', t:'Classe', c:'nom', items:['crayon','feutre','papier','ciseaux','colle','livre','peinture','tablette','manteau','chaussure']},
-  {id:'lieux', t:'Où ?', c:'mot', items:['dans','sur','sous','devant','derriere','acote','avec','maison','boite','table','cour','parc','toilettes','lit']},
-  {id:'comment', t:'Comment', c:'desc', items:['grand','petit','gros','chaud','froid','casse','plein','vide','pareil','different','rouge','bleu','jaune','vert','vite','doucement']},
-  {id:'emotions', t:'Émotions', c:'desc', items:['etre','content','triste','colere','fatigue','calme','surpris','p_mal','p_pause']},
-  {id:'petits', t:'Petits mots', c:'mot', items:['le','la','les','un','une','et','mais','parceque','apres','puis','pas','avec']},
-  {id:'social', t:'Dire à l\'autre', c:'social', items:['bonjour','aurevoir','oui','non','merci','stp','encore','stop','atoi','amoi','bravo','cestbon']},
-  {id:'questions', t:'Questions', c:'quest', items:['qui','quoi','ou','quand','pourquoi','cestquoi','onfait','fini']},
-  {id:'photos', t:'Mes photos', c:'nom', items:[]},
+  {id:'accueil', t:'Début', c:'prag', ico:'🏠', pal:1, items:['p_veux','p_nonveux','p_aide','p_dire','p_regarde','p_sens','p_question','p_joue','p_pause','p_fini','p_arrete','p_mal']},
+  {id:'personnes', t:'Personnes', c:'pers', ico:'🙋', pal:1, items:['je','tu','il','elle','on','maitresse','maitre','aesh','copain','copine','maman','papa']},
+  {id:'actions', t:'Actions', c:'verbe', ico:'🏃', pal:1, items:['vouloir','aller','aimer','pouvoir','etre','courir','pousser','tirer','ouvrir','fermer','prendre','donner','tomber','mettre','enlever','chercher','regarder','attendre','couper','melanger','manger','boire','jouer','dormir','rouler','lancer','dessiner','lire','laver','aider','faire','finir']},
+  {id:'choses', t:'Les choses', c:'nom', ico:'🧸', pal:1, items:['voiture','ballon','cubes','doudou','bulles','livre','pomme','gateau','eau','crayon','tablette','manteau'], plus:['g_jouets','g_manger','g_classe']},
+  {id:'jouets', t:'Jouer', c:'nom', ico:'🚗', pal:3, items:['voiture','ballon','cubes','poupee','train','puzzle','doudou','bulles','pate','toboggan','balancoire','livre']},
+  {id:'manger', t:'Manger', c:'nom', ico:'🍎', pal:3, items:['pomme','banane','gateau','pain','yaourt','compote','biscuit','eau','lait']},
+  {id:'classe', t:'Classe', c:'nom', ico:'✏️', pal:3, items:['crayon','feutre','papier','ciseaux','colle','livre','peinture','tablette','manteau','chaussure']},
+  {id:'lieux', t:'Où ?', c:'mot', ico:'📍', pal:2, items:['dans','sur','sous','devant','derriere','acote','avec','maison','boite','table','cour','parc','toilettes','lit']},
+  {id:'comment', t:'Comment', c:'desc', ico:'🎨', pal:2, items:['grand','petit','gros','chaud','froid','casse','plein','vide','pareil','different','rouge','bleu','jaune','vert','vite','doucement']},
+  {id:'emotions', t:'Émotions', c:'desc', ico:'😊', pal:2, items:['etre','content','triste','colere','fatigue','calme','surpris','p_mal','p_pause']},
+  {id:'petits', t:'Petits mots', c:'mot', ico:'🔗', pal:3, items:['le','la','les','un','une','et','mais','parceque','apres','puis','pas','avec']},
+  {id:'social', t:'Dire à l\'autre', c:'social', ico:'👋', pal:3, items:['bonjour','aurevoir','oui','non','merci','stp','encore','stop','atoi','amoi','bravo','cestbon']},
+  {id:'questions', t:'Questions', c:'quest', ico:'❓', pal:3, items:['qui','quoi','ou','quand','pourquoi','cestquoi','onfait','fini']},
+  {id:'scenes', t:'Mes scènes', c:'nom', ico:'🖼️', pal:1, scene:true, items:[]},
+  {id:'photos', t:'Mes photos', c:'nom', ico:'📷', pal:1, items:[]},
 ];
+
+/* Les six mots les plus utiles restent sous les yeux de l'eleve, a tous les
+   paliers : il n'a jamais a changer de page pour accepter, refuser ou demander. */
+const FIXES = ['oui','non','encore','stop','p_aide','p_fini'];
+
+const PALIERS = [
+  {n:1, t:'Découvrir',  sous:'4 onglets',  niv:'niveaux 1 et 2', d:"L'élève apprend où sont les mots. Qui, Fait quoi, Les choses : le chemin d'une phrase, et rien de plus."},
+  {n:2, t:'Construire', sous:'7 onglets',  niv:'niveaux 3 et 4', d:"On ajoute le lieu, la description et les émotions : la phrase s'allonge."},
+  {n:3, t:'Raconter',   sous:'13 onglets', niv:'niveaux 5 à 7',  d:"Tout le tableau : les catégories de choses, les petits mots, les formules sociales et les questions."}
+];
+const palierActif = () => settings.palier === 'auto'
+  ? (settings.niveau <= 2 ? 1 : settings.niveau <= 4 ? 2 : 3)
+  : +settings.palier;
+const pagesVisibles = () => PAGES.filter(p =>
+  p.pal <= palierActif()
+  && (p.id !== 'photos' || custom.length)
+  && (p.id !== 'scenes' || scenes.length));
 
 /* =====================================================================
    LANGUE : rendu d'une production, reformulation et +1
@@ -670,11 +758,15 @@ const hm = () => { const d=new Date(); return String(d.getHours()).padStart(2,'0
 
 const RELAIS_DEFAUT = 'https://adaptedl-relais.chris333j.workers.dev';
 const MODELES_ALBERT = ['Mistral-Small-3.2-24B','openweight-medium'];
-let settings = Object.assign({prenom:'', niveau:2, taille:'m', lireToucher:true, aideAdulte:true, verrou:true, rate:0.9, souffleur:true, albert:true, relais:RELAIS_DEFAUT, imp:{mm:42, ops:true, fleches:true, pages:null}}, load('settings',{}));
+let settings = Object.assign({prenom:'', niveau:2, taille:'m', lireToucher:true, aideAdulte:true, verrou:true, rate:0.9, souffleur:true, palier:'auto', albert:true, relais:RELAIS_DEFAUT, imp:{mm:42, ops:true, fleches:true, pages:null}}, load('settings',{}));
 let logData = load('log', []);
 let counters = load('cnt', {});
 let custom = load('custom', []);
-const S = {page:'accueil', hist:[], strip:[], spoken:false, modeling:false, section:'posture'};
+/* Scenes = « photos parlantes » (visual scene displays). Les etudes les
+   donnent plus accessibles que les grilles pour les plus jeunes : le mot reste
+   dans son contexte reel, ce qui demande moins de memoire de travail. */
+let scenes = load('scenes', []);
+const S = {page:'accueil', hist:[], strip:[], spoken:false, modeling:false, section:'posture', viaTuile:false, scene:null};
 
 function cnt(){ const d=today(); if(!counters[d]) counters[d]={occ:{habillage:0,jeu:0,album:0,repas:0,activite:0}, ad:{comment:0,question:0,attente:0,modele:0,enrichi:0}}; return counters[d]; }
 function bump(group,key,delta=1){ const c=cnt(); c[group][key]=Math.max(0,(c[group][key]||0)+delta); save('cnt',counters); }
@@ -684,7 +776,7 @@ function registerCustom(){
   PAGES.forEach(p => p.items = p.items.filter(id=>!id.startsWith('c_')));
   const tete = {};
   custom.forEach(c => {
-    W[c.id] = c.cls==='nom' ? {id:c.id,t:c.t,img:c.img,c:'nom',g:c.g||'m',adj:null,noArt:/^(le |la |les |l'|mon |ma |mes )/i.test(c.t)}
+    W[c.id] = c.cls==='nom' ? {id:c.id,t:c.t,img:c.img,c:'nom',g:c.g||'m',adj:null,noArt:/^(le |la |les |l'|mon |ma |mes |chez |au |aux |à )/i.test(c.t)}
             : c.cls==='verbe' ? {id:c.id,t:c.t,img:c.img,c:'verbe'}
             : {id:c.id,t:c.t,img:c.img,c:c.cls,noArt:true};
     const pg = PAGES.find(p=>p.id===c.page); if(!pg || c.page==='photos') return;
@@ -693,6 +785,15 @@ function registerCustom(){
   for(const id in tete){ const pg=PAGES.find(p=>p.id===id); pg.items = tete[id].concat(pg.items); }
   PAGES.find(p=>p.id==='photos').items = custom.slice().sort((a,b)=>(b.prio?1:0)-(a.prio?1:0)).map(c=>c.id);
 }
+function registerScenes(){
+  scenes.forEach(sc => (sc.points||[]).forEach((pt,i) => {
+    const id = 's_'+sc.id+'_'+i;
+    W[id] = {id, t:pt.t, e:'🖼️', c:'nom', g:genreDe(pt.t),
+             noArt:/^(le |la |les |l'|mon |ma |mes |chez |au |aux |à |un |une |des )/i.test(pt.t)};
+    pt.wid = id;
+  }));
+}
+
 function applySettings(){
   $('#btnSouf').classList.toggle('on', settings.souffleur);
   document.documentElement.style.setProperty('--tile', {s:'100px',m:'124px',l:'160px'}[settings.taille]||'124px');
@@ -716,19 +817,61 @@ function tileHTML(w, cls){
   const go = w.go ? '<span class="go" aria-hidden="true">▶</span>' : '';
   return `<button class="tile c-${w.c} ${w.c==='prag'?'prag':''}" data-id="${w.id}" aria-label="${w.t}">${go}${vis}<span>${w.t}</span></button>`;
 }
+function apercuPage(p){
+  if(p.scene){ const s=scenes[0];
+    return s ? `<span class="tmini" aria-hidden="true"><i style="grid-column:1/-1;grid-row:1/-1"><img src="${s.img}" alt=""></i></span>`
+             : `<span class="tico" aria-hidden="true">${p.ico}</span>`; }
+  const ids = (p.id==='photos' ? custom.map(x=>x.id) : p.items).slice(0,4);
+  if(!ids.length) return `<span class="tico" aria-hidden="true">${p.ico||''}</span>`;
+  return `<span class="tmini" aria-hidden="true">${ids.map(id=>{ const w=W[id];
+    return `<i>${w ? (w.img?`<img src="${w.img}" alt="">`:w.e||'') : ''}</i>`; }).join('')}</span>`;
+}
 function renderTabs(){
-  $('#tabs').innerHTML = PAGES.filter(p=>p.id!=='photos'||custom.length).map(p=>
-    `<button class="c-${p.c} ${p.id===S.page?'cur':''}" data-page="${p.id}">${p.t}</button>`).join('');
+  $('#tabs').innerHTML = pagesVisibles().map(p =>
+    `<button class="c-${p.c} ${p.id===S.page?'cur':''}" data-page="${p.id}">
+       ${apercuPage(p)}<span class="tnom">${p.t}</span></button>`).join('');
+}
+function renderFixes(){
+  const box=$('#fixes');
+  box.innerHTML = FIXES.map(id=>{ const w=W[id]; if(!w) return '';
+    return `<button class="fixe c-${w.c}" data-id="${id}" aria-label="${w.t}"><span class="em">${w.e}</span><span>${w.t}</span></button>`;
+  }).join('');
 }
 function renderPage(){
-  const p = PAGES.find(x=>x.id===S.page) || PAGES[0];
-  $('#pageTitle').innerHTML = `<i style="background:var(--k-${p.c==='prag'?'pers':p.c})"></i>${p.t}`;
-  $('#grid').innerHTML = p.items.length ? p.items.map(id=>W[id]?tileHTML(W[id]):'').join('')
-    : '<p class="lead">Aucun picto photo. Ajoutez-en depuis l\'espace adulte, rubrique « Mes pictos photo ».</p>';
+  let p = PAGES.find(x=>x.id===S.page);
+  if(!p || (p.pal > palierActif() && !S.viaTuile)) { p = PAGES[0]; S.page = p.id; }
+  const sc = p.scene ? scenes.find(s=>s.id===S.scene) : null;
+  $('#pageTitle').innerHTML = `<i style="background:var(--k-${p.c==='prag'?'pers':p.c})"></i>${p.ico||''} ${sc?sc.titre:p.t}`;
+  if(p.scene){ renderScene(); renderTabs(); $('#pageBox').scrollTop=0; return; }
+  const liste = p.items.concat(palierActif()>=2 ? (p.plus||[]) : []);
+  // Un espace blanc entre deux familles de couleur : les etudes montrent que
+  // ce regroupement accelere la recherche autant qu'un indice de couleur.
+  let html='', prec=null;
+  liste.forEach(id=>{ const w=W[id]; if(!w) return;
+    if(prec && w.c!==prec) html += '<div class="sep"></div>';
+    html += tileHTML(w); prec = w.c; });
+  $('#grid').innerHTML = html || '<p class="lead">Aucun picto photo. Ajoutez-en depuis l\'espace adulte, rubrique « Mes pictos photo ».</p>';
   renderTabs();
   $('#pageBox').scrollTop=0;
 }
+function renderScene(){
+  const sc = scenes.find(s=>s.id===S.scene) || scenes[0];
+  if(!sc){ $('#grid').innerHTML = '<p class="lead">Aucune scène. Ajoutez-en depuis l\'espace adulte, rubrique « Mes scènes ».</p>'; return; }
+  S.scene = sc.id;
+  const pts = (sc.points||[]).map((pt,i)=>{ const w=W[pt.wid]; if(!w) return '';
+    return `<button class="pt ${pt.y>72?'bas':''}" style="left:${pt.x}%;top:${pt.y}%" data-id="${pt.wid}" aria-label="${pt.t}">
+      <span class="lb">${pt.t}</span></button>`; }).join('');
+  $('#grid').innerHTML = `
+    <div style="grid-column:1/-1">
+      <div class="scene" style="--ar:${sc.ar||1.5}">${sc.img?`<img src="${sc.img}" alt="${sc.titre}">`:''}${pts}</div>
+      ${scenes.length>1?`<div class="scnav">${scenes.map(s=>
+        `<button class="${s.id===sc.id?'cur':''}" data-sc="${s.id}"><img src="${s.img}" alt=""><span>${s.titre}</span></button>`).join('')}</div>`:''}
+      ${(sc.points||[]).length?'':'<p class="scvide">Cette scène n\'a pas encore de point à toucher.</p>'}
+    </div>`;
+}
+
 function goPage(id, remember=true){ if(id===S.page) return; if(remember) S.hist.push(S.page); S.page=id; renderPage(); }
+function majPalier(){ S.hist=[]; S.page='accueil'; renderPage(); renderFixes(); }
 function renderStrip(){
   const st=$('#strip');
   st.classList.toggle('model', S.modeling);
@@ -756,9 +899,13 @@ function tapWord(id){
   S.strip.push(...toAdd);
   if(settings.lireToucher) speak(w.addT ? 'je veux' : w.t);
   renderStrip();
-  if(w.go) goPage(w.go);
+  if(w.go){ S.viaTuile=true; goPage(w.go); S.viaTuile=false; }
 }
-$('#grid').addEventListener('click', e => { const b=e.target.closest('.tile'); if(!b) return; b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'),120); tapWord(b.dataset.id); });
+$('#fixes').addEventListener('click', e => { const b=e.target.closest('.fixe'); if(b) tapWord(b.dataset.id); });
+$('#grid').addEventListener('click', e => {
+  const pt=e.target.closest('.pt'); if(pt){ tapWord(pt.dataset.id); return; }
+  const sc=e.target.closest('[data-sc]'); if(sc){ S.scene=sc.dataset.sc; renderScene(); return; }
+  const b=e.target.closest('.tile'); if(!b) return; b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'),120); tapWord(b.dataset.id); });
 $('#tabs').addEventListener('click', e => { const b=e.target.closest('button'); if(b) goPage(b.dataset.page); });
 $('#bBack').onclick = () => { S.strip.pop(); S.spoken=false; renderStrip(); };
 $('#bClear').onclick = () => { S.strip=[]; S.spoken=false; renderStrip(); };
@@ -960,7 +1107,7 @@ const MOMENTS = [
 function renderSection(){
   document.querySelectorAll('#anav button').forEach(b=>b.classList.toggle('cur', b.dataset.sec===S.section));
   const c=$('#acontent');
-  ({posture:secPosture, progression:secProgression, occasions:secOccasions, suivi:secSuivi, photos:secPhotos, impression:secImpression, reglages:secReglages, sources:secSources})[S.section](c);
+  ({posture:secPosture, progression:secProgression, occasions:secOccasions, suivi:secSuivi, scenes:secScenes, photos:secPhotos, impression:secImpression, reglages:secReglages, sources:secSources})[S.section](c);
   c.scrollTop=0;
 }
 
@@ -1021,6 +1168,9 @@ function secPosture(c){
 
   <div class="box note prose"><b>À propos du « langage gestaltiste » (GLP / méthode NLA).</b> Très présent sur les réseaux, ce modèle n'est pas validé à ce jour : une revue systématique fin 2024 n'a trouvé aucune étude empirique de son efficacité, et une analyse critique la même année juge ses « étapes » insuffisamment étayées. On peut partir des phrases toutes faites de l'enfant et chercher leur fonction, sans avoir besoin de cette catégorie.</div>
 
+  <h2>Grille ou scène ?</h2>
+  <div class="box prose">Les deux, et dans cet ordre. Pour un élève qui débute, commencez par les <b>scènes</b> (rubrique « Mes scènes ») : la photo du coin goûter, du bac à jouets, de la cour, avec des points à toucher posés sur les objets. L'enfant touche la chose là où il la voit, sans avoir à la retrouver dans une grille ni à choisir une page. C'est la forme que les plus jeunes utilisent avec le plus de réussite. La grille prend le relais quand il commence à combiner des mots : elle seule permet de fabriquer des phrases nouvelles.</div>
+
   <h2>À propos du PODD</h2>
   <div class="box prose">Le PODD (Pragmatic Organisation Dynamic Display, Gayle Porter) organise le vocabulaire en pages reliées, avec une page de <b>démarreurs</b> (« je veux », « j'ai quelque chose à dire », « je ne veux pas »…) qui mènent vers les pages de vocabulaire, et des <b>boutons de conduite</b> (« oups », « pas le mot », « page d'avant »). Cette application s'en inspire mais ne remplace pas le classeur PODD de l'élève : si l'élève en a un, gardez le classeur papier comme outil principal et utilisez les mêmes photos ici (rubrique « Mes pictos photo ») pour que les repères restent identiques.</div>`;
 }
@@ -1032,6 +1182,19 @@ function secProgression(c){
   <p class="lead">Vocabulaire et syntaxe avancent en parallèle, pas en séances séparées : un mot nouveau est tout de suite utilisé dans une phrase modèle. Choisissez le niveau où l'élève produit déjà spontanément ; la cible est le niveau juste au-dessus.</p>
   <div class="row noprint">Niveau actuel de ${settings.prenom||"l'élève"} :
     ${LEVELS.map(l=>`<button class="lvlbtn ${l.n===lv?'on':''}" data-lv="${l.n}">${l.n}</button>`).join('')}</div>
+  <h2>Organisation du tableau de l'élève</h2>
+  <p class="lead">Le tableau grandit avec l'élève. Un onglet ne change jamais de place, de couleur ni d'image quand on monte d'un palier : on ne fait qu'en ajouter. Ce que l'élève a appris reste vrai.</p>
+  <div class="palchoix noprint">
+    <button data-pal="auto" class="${settings.palier==='auto'?'on':''}"><span class="n">↻</span>
+      <b>Automatique</b><span class="s">suit le niveau choisi ci-dessus</span>
+      <p>Aujourd'hui : palier ${palierActif()}, ${PALIERS[palierActif()-1].t.toLowerCase()}.</p></button>
+    ${PALIERS.map(l=>`<button data-pal="${l.n}" class="${String(settings.palier)===String(l.n)?'on':''}"><span class="n">${l.n}</span>
+      <b>${l.t}</b><span class="s">${l.sous} · ${l.niv}</span><p>${l.d}</p></button>`).join('')}
+  </div>
+  <p class="lead" style="margin-bottom:4px">Onglets visibles en ce moment, de haut en bas :</p>
+  <div class="apercu-ong">${pagesVisibles().map(p=>`<span class="c-${p.c} ${p.pal===palierActif()&&p.pal>1?'neuf':''}" style="--k:var(--k-${p.c==='prag'?'pers':p.c})">${p.ico||''} ${p.t}</span>`).join('')}</div>
+  <p class="lead">Sous la page, six mots restent toujours affichés : oui, non, encore, stop, aide-moi, j'ai fini. L'élève n'a jamais à changer de page pour accepter, refuser ou demander.</p>
+
   <table style="margin-top:12px">
     <tr><th>Niveau</th><th>Syntaxe</th><th>Vocabulaire associé</th><th>Modèle de l'adulte</th><th>Idée d'activité</th></tr>
     ${LEVELS.map(l=>`<tr class="${l.n===lv+1?'target':''}"><td><b>${l.n}</b>${l.n===lv?'<br><small>actuel</small>':l.n===lv+1?'<br><small>cible</small>':''}</td>
@@ -1045,7 +1208,8 @@ function secProgression(c){
     <div class="box"><h3>Pragmatique</h3>initier, répondre, maintenir un échange de plusieurs tours (« à toi », « à moi »).</div>
     <div class="box"><h3>Concepts</h3>dessus / dessous, grand / petit, avant / après, pareil / différent.</div>
   </div>`;
-  c.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{ settings.niveau=+b.dataset.lv; save('settings',settings); secProgression(c); });
+  c.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{ settings.niveau=+b.dataset.lv; save('settings',settings); majPalier(); secProgression(c); });
+  c.querySelectorAll('[data-pal]').forEach(b=>b.onclick=()=>{ settings.palier=b.dataset.pal; save('settings',settings); majPalier(); secProgression(c); toast('Palier '+palierActif()+' : '+PALIERS[palierActif()-1].t); });
 }
 
 function secOccasions(c){
@@ -1143,30 +1307,126 @@ ${td.map(x=>`${x.h}  ${x.txt}  (${x.n})`).join('\n')}`;
   $('#resetB').onclick=()=>{ if(confirm('Effacer toutes les productions et tous les compteurs ?')){ logData=[]; counters={}; save('log',logData); save('cnt',counters); secSuivi(c); } };
 }
 
-const TOUR = {
-  lieux: {page:'lieux', titre:"Les lieux de l'école", couleur:'nom', intro:"Photographiez chaque lieu tel que l'élève le voit en arrivant. Ces photos servent à demander, à anticiper et à se repérer.",
+/* ---------- modules de prise de photos ----------
+   Trois modules fournis, et autant que l'adulte veut en créer.
+   Les ajouts et les suppressions sont gardés sur l'appareil. */
+const TOUR_BASE = {
+  ecole: {page:'lieux', titre:"Les lieux de l'école", mot:'lieu',
+    intro:"Photographiez chaque lieu tel que l'élève le voit en arrivant. Ces photos servent à demander, à anticiper et à se repérer.",
     items:[["le coin regroupement","m"],["le coin jeux","m"],["le coin bibliothèque","m"],["les toilettes","p"],["la cour de récréation","f"],["le préau","m"],["la cantine","f"],["la salle de sieste","f"],["les porte-manteaux","p"],["la salle de motricité","f"],["le couloir","m"],["le bureau de la directrice","m"]]},
-  renfo: {page:'classe', titre:"Les renforçateurs identifiés", couleur:'nom', intro:"Photographiez ce que l'élève aime vraiment, tel que c'est rangé dans la classe. C'est ce qui lui donne une raison de communiquer.",
-    items:[["mon doudou","m"],["la tablette","f"],["les bulles","p"],["la piscine à balles","f"],["le trampoline","m"],["la balançoire","f"],["le puzzle préféré","m"],["la musique","f"],["le temps calme","m"]]}
+  renfo: {page:'classe', titre:"Les renforçateurs identifiés", mot:'renforçateur',
+    intro:"Photographiez ce que l'élève aime vraiment, tel que c'est rangé dans la classe. C'est ce qui lui donne une raison de communiquer.",
+    items:[["mon doudou","m"],["la tablette","f"],["les bulles","p"],["la piscine à balles","f"],["le trampoline","m"],["la balançoire","f"],["le puzzle préféré","m"],["la musique","f"],["le temps calme","m"]]},
+  maison:{page:'lieux', titre:"Les lieux de la maison", mot:'lieu',
+    intro:"À faire avec la famille : les mêmes photos à l'école et à la maison, pour que l'élève parle des deux endroits avec les mêmes images.",
+    items:[["la maison","f"],["ma chambre","f"],["mon lit","m"],["la cuisine","f"],["le canapé","m"],["la salle de bain","f"],["les WC","p"],["le jardin","m"],["le balcon","m"],["la voiture","f"],["chez mamie","x"],["chez papi","x"]]}
 };
+let tourSave = load('tour', {});
+const modules = () => {
+  // copie complete : modifier un tour ne doit jamais abimer la liste d'origine
+  const copie = M => { const o = Object.assign({}, M); o.items = (M.items||[]).map(it=>it.slice()); return o; };
+  const out = {};
+  for(const k in TOUR_BASE) out[k] = copie(Object.assign({}, TOUR_BASE[k], tourSave[k]||{}));
+  for(const k in tourSave) if(!out[k]) out[k] = copie(tourSave[k]);
+  return out;
+};
+function majModule(k, M){
+  tourSave[k] = {titre:M.titre, page:M.page, mot:M.mot||'picto', intro:M.intro, items:M.items, perso:!!M.perso};
+  save('tour', tourSave);
+}
+const genreDe = t => /^(les |mes |des )/i.test(t) ? 'p' : /^(la |ma |une |l')/i.test(t) ? 'f' : 'm';
+
+function secScenes(c){
+  const sel = scenes.find(s=>s.id===c._sc) || scenes[0] || null;
+  if(sel) c._sc = sel.id;
+  c.innerHTML = `
+  <h1>Mes scènes</h1>
+  <p class="lead">Une scène est la <b>photo d'un vrai moment</b> — le coin goûter, le bac à jouets, la cour — sur laquelle vous posez des points à toucher. L'élève touche directement la chose dans son contexte, au lieu de la retrouver dans une grille. C'est la forme que les jeunes enfants utilisent le plus facilement.</p>
+  <div class="box" style="max-width:720px">
+    <h3>Ajouter une scène</h3>
+    <label class="f" for="sT">Nom de la scène</label><input type="text" id="sT" placeholder="ex. Le coin goûter" style="width:100%">
+    <label class="f" for="sF">Photo</label><input type="file" id="sF" accept="image/*">
+    <p class="c" style="margin-top:8px">Photographiez de près, avec les objets bien visibles. Une personne en action dans la photo attire davantage l'attention des élèves.</p>
+  </div>
+  ${scenes.length?`
+  <h2>Poser les points à toucher</h2>
+  <div class="row noprint">${scenes.map(s=>`<button class="lvlbtn ${s.id===c._sc?'on':''}" data-pick="${s.id}">${s.titre}</button>`).join('')}</div>
+  ${sel?`
+    <p class="lead" style="margin:10px 0 6px">Touchez la photo à l'endroit de l'objet, puis écrivez le mot ou la phrase que l'élève dira. Faites des points <b>grands et espacés</b> : un enfant qui vise mal doit quand même réussir.</p>
+    <div class="scene edit" id="sEd" style="--ar:${sel.ar||1.5};max-width:720px;cursor:crosshair">
+      <img src="${sel.img}" alt="${sel.titre}">
+      ${(sel.points||[]).map(pt=>`<span class="pt edit ${pt.y>72?'bas':''}" style="left:${pt.x}%;top:${pt.y}%"><span class="lb">${pt.t}</span></span>`).join('')}
+    </div>
+    <div class="ptlist">${(sel.points||[]).length?(sel.points||[]).map((pt,i)=>
+      `<span class="pitem">${pt.t}<button class="pill" data-rmpt="${i}">✕</button></span>`).join('')
+      :'<span class="c">Aucun point pour l\'instant.</span>'}</div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn danger" id="sDel">Supprimer cette scène</button>
+      <span class="c">La scène apparaît dans l'onglet « Mes scènes » du tableau de l'élève.</span>
+    </div>`:''}`
+  :'<p class="lead" style="margin-top:16px">Aucune scène pour l\'instant.</p>'}
+  <div id="sPop" hidden></div>`;
+
+  const lirePhoto = (f, apres) => {
+    const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{
+      const L=1000, k=Math.min(1, L/Math.max(im.width,im.height));
+      const cv=document.createElement('canvas'); cv.width=im.width*k; cv.height=im.height*k;
+      cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+      apres(cv.toDataURL('image/jpeg',0.72), im.width/im.height);
+    }; im.src=r.result; }; r.readAsDataURL(f);
+  };
+  $('#sF').onchange = e => { const f=e.target.files[0]; if(!f) return;
+    const t=$('#sT').value.trim() || 'Scène '+(scenes.length+1);
+    lirePhoto(f, (img, ar) => { const id='sc_'+Date.now();
+      scenes.push({id, titre:t, img, ar, points:[]}); save('scenes',scenes); registerScenes();
+      c._sc=id; toast('Scène ajoutée'); secScenes(c); });
+  };
+  c.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ c._sc=b.dataset.pick; secScenes(c); });
+  c.querySelectorAll('[data-rmpt]').forEach(b=>b.onclick=()=>{
+    sel.points.splice(+b.dataset.rmpt,1); save('scenes',scenes); registerScenes(); secScenes(c); });
+  const ed=$('#sEd');
+  if(ed) ed.onclick = e => {
+    if(e.target.closest('.pt')) return;
+    const r=ed.getBoundingClientRect();
+    const x=Math.round((e.clientX-r.left)/r.width*100), y=Math.round((e.clientY-r.top)/r.height*100);
+    const mot = prompt('Que dira l\'élève en touchant ici ?\nÉcrivez-le comme il le dirait : « le gâteau », « encore », « j\'ai fini ».');
+    if(!mot || !mot.trim()) return;
+    sel.points = sel.points||[]; sel.points.push({x, y, t:mot.trim()});
+    save('scenes',scenes); registerScenes(); secScenes(c);
+  };
+  const sd=$('#sDel');
+  if(sd) sd.onclick=()=>{ if(confirm('Supprimer la scène « '+sel.titre+' » ?')){
+    scenes = scenes.filter(s=>s.id!==sel.id); save('scenes',scenes); registerScenes(); c._sc=null; secScenes(c); } };
+}
 
 function secPhotos(c){
+  const MO = modules();
   const fait = t => custom.some(x=>x.t.toLowerCase()===t.toLowerCase());
-  const bloc = k => { const T=TOUR[k]; const n=T.items.filter(it=>fait(it[0])).length; return `
+  const nomPage = id => (PAGES.find(p=>p.id===id)||{t:'?'}).t;
+
+  const bloc = k => { const T=MO[k]; const n=T.items.filter(it=>fait(it[0])).length; const tot=Math.max(1,T.items.length); return `
     <div class="box" style="margin:0">
-      <div class="row" style="justify-content:space-between"><h3>${T.titre}</h3><span class="c">${n} / ${T.items.length}</span></div>
-      <div class="bar" style="margin:4px 0 10px"><i style="width:${n/T.items.length*100}%"></i></div>
-      <p class="tip">${T.intro}</p>
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <h3 style="margin:0">${T.titre}</h3>
+        <span class="c">${n} / ${T.items.length} · va dans « ${nomPage(T.page)} »</span>
+      </div>
+      <div class="bar" style="margin:6px 0 10px"><i style="width:${n/tot*100}%"></i></div>
+      <p class="tip">${T.intro||''}</p>
       ${T.items.map((it,i)=>`<div class="tourrow ${fait(it[0])?'ok':''}">
         <input type="text" value="${it[0]}" data-t="${k}:${i}" aria-label="mot du picto">
-        <button class="pill" data-shot="${k}:${i}">${fait(it[0])?'✓ refaire':'📷 photo'}</button></div>`).join('')}
-      <div class="row" style="margin-top:8px"><input type="text" placeholder="autre ${k==='lieux'?'lieu':'renforçateur'}…" data-t="${k}:libre" style="flex:1">
-        <button class="pill" data-shot="${k}:libre">📷 photo</button></div>
+        <button class="pill" data-shot="${k}:${i}">${fait(it[0])?'✓ refaire':'📷 photo'}</button>
+        <button class="pill" data-rm="${k}:${i}" title="Retirer cette ligne">✕</button></div>`).join('')}
+      <div class="row" style="margin-top:8px">
+        <input type="text" placeholder="autre ${T.mot||'picto'}…" data-new="${k}" style="flex:1">
+        <button class="pill" data-add="${k}">+ Ajouter</button>
+        ${T.perso?`<button class="pill" data-delmod="${k}" title="Supprimer ce module">🗑 Module</button>`
+                 :`<button class="pill" data-reset="${k}" title="Revenir à la liste d'origine">↺</button>`}
+      </div>
     </div>`; };
 
   c.innerHTML = `
   <h1>Mes pictos photo</h1>
-  <p class="lead">Les photos des vrais lieux et des vrais objets de l'école valent mieux que des dessins : l'élève reconnaît ce qu'il voit tous les jours. Tout reste sur cet appareil.</p>
+  <p class="lead">Les photos des vrais lieux et des vrais objets valent mieux que des dessins : l'élève reconnaît ce qu'il voit tous les jours. Tout reste sur cet appareil.</p>
   <div class="cols" style="align-items:start">
     <div class="box" style="margin:0">
       <h3>Ajouter un picto</h3>
@@ -1182,12 +1442,19 @@ function secPhotos(c){
     </div>
     <div>
       <div class="box" style="margin:0 0 12px;border-color:var(--accent);background:var(--accent-soft)">
-        <h3>📸 Tour de l'école — AESH et enseignant·e</h3>
-        <p class="tip" style="color:var(--ink)">À faire une fois, en dix minutes, si possible avec l'élève : il vous accompagne et vous montre. Les pictos créés ici se placent <b>en premier</b> dans « Où ? » et dans « Classe », là où l'élève les cherchera.</p>
+        <h3>📸 Tours de photos — AESH, enseignant·e et famille</h3>
+        <p class="tip" style="color:var(--ink)">Chaque tour se fait une fois, en dix minutes, si possible avec l'élève : il vous accompagne et vous montre. Les pictos créés ici se placent <b>en premier</b> dans leur page, là où l'élève les cherchera.</p>
       </div>
-      ${bloc('lieux')}
+      ${Object.keys(MO).map(k=>bloc(k)).join('<div style="height:12px"></div>')}
       <div style="height:12px"></div>
-      ${bloc('renfo')}
+      <div class="box" style="margin:0;border-style:dashed">
+        <h3 style="margin:0 0 8px">Créer un autre tour</h3>
+        <p class="tip">Par exemple : les personnes de l'école, le trajet du bus, les jeux de la cour, les objets du centre de loisirs.</p>
+        <label class="f" for="mT">Nom du tour</label><input type="text" id="mT" placeholder="ex. Les personnes de l'école" style="width:100%">
+        <label class="f" for="mP">Page du tableau où iront ces pictos</label>
+        <select id="mP" style="width:100%">${PAGES.filter(p=>p.id!=='accueil').map(p=>`<option value="${p.id}">${p.t}</option>`).join('')}</select>
+        <div class="row" style="margin-top:10px"><button class="btn" id="mAdd">Créer le tour</button></div>
+      </div>
     </div>
   </div>
   <input type="file" id="tourF" accept="image/*" hidden>
@@ -1212,24 +1479,56 @@ function secPhotos(c){
     save('custom',custom); registerCustom(); toast('Picto ajouté'); secPhotos(c);
   };
 
-  // tour de l'école : une photo par ligne, ajoutée en tête de sa page
+  // une photo par ligne, ajoutée en tête de la page du module
   const champ = $('#tourF');
   c.querySelectorAll('[data-shot]').forEach(b=>b.onclick=()=>{
     const [k,i] = b.dataset.shot.split(':');
-    const saisie = c.querySelector(`[data-t="${k}:${i}"]`);
-    const t = saisie.value.trim();
+    const T = MO[k];
+    const t = c.querySelector(`[data-t="${k}:${i}"]`).value.trim();
     if(!t){ toast('Écrivez le mot avant la photo'); return; }
-    const g = i==='libre' ? (/^les |^mes /i.test(t)?'p':/^la |^l'/i.test(t)?'f':'m') : TOUR[k].items[+i][1];
+    let g = T.items[+i][1];
+    if(g==='x' || !g) g = genreDe(t);
     champ.value='';
     champ.onchange = e => { const f=e.target.files[0]; if(!f) return;
       photo(f, d=>{
+        if(T.items[+i][0] !== t){ T.items[+i][0] = t; majModule(k, T); }
         custom = custom.filter(x=>x.t.toLowerCase()!==t.toLowerCase());
-        custom.unshift({id:'c_'+Date.now(), t, cls:'nom', g, page:TOUR[k].page, img:d, prio:1});
+        custom.unshift({id:'c_'+Date.now(), t, cls:'nom', g, page:T.page, img:d, prio:1});
         save('custom',custom); registerCustom(); toast(t+' : picto ajouté'); secPhotos(c);
       });
     };
     champ.click();
   });
+
+  // ajouter une ligne à un module
+  c.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.add, ch=c.querySelector(`[data-new="${k}"]`), t=ch.value.trim();
+    if(!t){ toast('Écrivez le mot à ajouter'); ch.focus(); return; }
+    const T=MO[k]; T.items.push([t, genreDe(t)]); majModule(k,T); secPhotos(c);
+  });
+  // retirer une ligne (le picto déjà pris, lui, reste dans la liste du bas)
+  c.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{
+    const [k,i]=b.dataset.rm.split(':'); const T=MO[k];
+    T.items.splice(+i,1); majModule(k,T); secPhotos(c);
+  });
+  c.querySelectorAll('[data-reset]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.reset;
+    if(confirm('Revenir à la liste d\'origine de ce tour ? Les photos déjà prises sont conservées.')){
+      delete tourSave[k]; save('tour',tourSave); secPhotos(c);
+    }
+  });
+  c.querySelectorAll('[data-delmod]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.delmod;
+    if(confirm('Supprimer ce tour ? Les photos déjà prises sont conservées.')){
+      delete tourSave[k]; save('tour',tourSave); secPhotos(c);
+    }
+  });
+  $('#mAdd').onclick=()=>{
+    const t=$('#mT').value.trim(); if(!t){ toast('Donnez un nom au tour'); return; }
+    const k='m_'+Date.now();
+    majModule(k, {titre:t, page:$('#mP').value, mot:'picto', intro:'Ajoutez les mots de ce tour, puis photographiez-les un par un.', items:[], perso:true});
+    toast('Tour créé'); secPhotos(c);
+  };
 
   c.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ custom=custom.filter(x=>x.id!==b.dataset.del); save('custom',custom); registerCustom(); secPhotos(c); });
 }
@@ -1238,8 +1537,9 @@ const OPS_PRINT = ['🏠 Début','↩️ Page d\'avant','🙊 Oups, erreur','�
 
 function feuilles(){
   const I = settings.imp;
-  const choisies = I.pages || PAGES.filter(p=>p.id!=='photos'||custom.length).map(p=>p.id);
-  const pages = PAGES.filter(p=>choisies.includes(p.id) && p.items.length);
+  const dispo = pagesVisibles();
+  const choisies = I.pages || dispo.map(p=>p.id);
+  const pages = dispo.filter(p=>choisies.includes(p.id) && p.items.length);
   return pages.map((p,i) => {
     const cartes = p.items.map(id=>{ const w=W[id]; if(!w) return '';
       const cible = w.go ? (PAGES.find(x=>x.id===w.go)||{}).t : null;
@@ -1247,7 +1547,7 @@ function feuilles(){
       return `<div class="pcard c-${w.c}">${vis}<span>${w.t}</span>${(cible&&I.fleches)?`<span class="pgo">→ ${cible}</span>`:''}</div>`;
     }).join('');
     return `<section class="psheet c-${p.c==='prag'?'pers':p.c}">
-      <div class="phead"><b>${p.t}</b><span class="pnum">page ${i+1} / ${pages.length}</span></div>
+      <div class="phead"><b>${p.ico||''} ${p.t}</b><span class="pnum">page ${i+1} / ${pages.length}</span></div>
       <div class="pgrid">${cartes}</div>
       ${I.ops?`<div class="pops">${OPS_PRINT.map(o=>`<div>${o}</div>`).join('')}</div>`:''}
       <div class="pfoot"><span>Adaptparole${settings.prenom?' · classeur de '+settings.prenom:''}</span><span>${p.t}</span></div>
@@ -1257,11 +1557,11 @@ function feuilles(){
 
 function secImpression(c){
   const I = settings.imp;
-  const choisies = I.pages || PAGES.filter(p=>p.id!=='photos'||custom.length).map(p=>p.id);
+  const choisies = I.pages || pagesVisibles().map(p=>p.id);
   const parLigne = Math.max(1, Math.floor(194/(I.mm+3)));
   c.innerHTML = `
   <h1>Imprimer le classeur</h1>
-  <p class="lead">Une feuille A4 par page du tableau, dans le même ordre et avec les mêmes couleurs que l'écran. À plastifier et à relier : l'élève garde ainsi le même outil quand l'iPad est éteint, en récréation ou à la cantine.</p>
+  <p class="lead">Une feuille A4 par page du tableau, dans le même ordre et avec les mêmes couleurs que l'écran. Seules les pages du palier en cours (palier ${palierActif()}, ${PALIERS[palierActif()-1].t.toLowerCase()}) sont proposées. À plastifier et à relier : l'élève garde ainsi le même outil quand l'iPad est éteint, en récréation ou à la cantine.</p>
   <div class="box" style="max-width:700px">
     <label class="f" for="pS">Taille des images : <b id="pSv">${I.mm} mm</b> de côté — environ ${parLigne} par ligne</label>
     <input type="range" id="pS" min="25" max="70" step="1" value="${I.mm}" style="width:100%">
@@ -1269,7 +1569,7 @@ function secImpression(c){
     <label class="f"><input type="checkbox" id="pO" ${I.ops?'checked':''}> Bandeau des boutons de conduite en bas de chaque feuille</label>
     <label class="f"><input type="checkbox" id="pF" ${I.fleches?'checked':''}> Indiquer vers quelle page mène un démarreur (→ Jouer)</label>
     <label class="f">Pages à imprimer</label>
-    <div class="chk">${PAGES.filter(p=>p.id!=='photos'||custom.length).map(p=>
+    <div class="chk">${pagesVisibles().map(p=>
       `<label><input type="checkbox" data-pg="${p.id}" ${choisies.includes(p.id)?'checked':''}> ${p.t} <span class="c">(${p.items.length})</span></label>`).join('')}</div>
     <div class="row" style="margin-top:12px"><button class="btn" id="pGo">Imprimer</button><button class="btn sec" id="pAll">Tout cocher</button><button class="btn sec" id="pNone">Tout décocher</button></div>
     <p class="c" style="margin-top:8px">Dans la fenêtre d'impression, laissez les marges par défaut et activez « graphiques d'arrière-plan » pour conserver les couleurs.</p>
@@ -1307,6 +1607,8 @@ function secReglages(c){
     <label class="f"><input type="checkbox" id="rL" ${settings.lireToucher?'checked':''}> Prononcer chaque image au toucher</label>
     <label class="f"><input type="checkbox" id="rA" ${settings.aideAdulte?'checked':''}> Afficher l'aide à l'adulte après « Dire »</label>
     <label class="f"><input type="checkbox" id="rSf" ${settings.souffleur?'checked':''}> Bandeau souffleur pendant que l'élève compose</label>
+    <label class="f">Organisation du tableau</label>
+    <p class="c" style="margin:0">Palier ${palierActif()} — ${PALIERS[palierActif()-1].t} (${pagesVisibles().length} onglets)${settings.palier==='auto'?', réglé automatiquement sur le niveau':''}. Se change dans « Progression ».</p>
     <label class="f"><input type="checkbox" id="rV" ${settings.verrou?'checked':''}> Appui long pour ouvrir l'espace adulte</label>
   </div>
   <div class="box" style="max-width:640px">
@@ -1339,6 +1641,10 @@ function secSources(c){
     <li><b>ASHA, troubles du langage oral chez l'enfant d'âge préscolaire.</b> Élargir le vocabulaire (verbes, pronoms, connecteurs, concepts de base), allonger et complexifier les phrases, diversifier les types de phrases.</li>
     <li><b>Écholalie.</b> Revue de 2025 : beaucoup d'interventions visaient à réduire l'écholalie, peu montraient une augmentation de la communication spontanée ; l'écholalie peut avoir une fonction communicative ou d'autorégulation.</li>
     <li><b>GLP / NLA.</b> Revue systématique fin 2024 (18 bases, 3 registres d'essais) : aucune étude empirique d'efficacité ; analyse critique 2024 : modèle théorique insuffisamment étayé.</li>
+    <li><b>Forme du tableau (Light, Drager et coll., 2007 ; Light et coll., 2019).</b> Chez les plus jeunes enfants, les <b>scènes photographiques</b> (visual scene displays) donnent la localisation du vocabulaire la plus exacte : le mot reste dans son contexte, ce qui demande moins de mémoire de travail. Les auteurs recommandent des photos personnalisées montrant des personnes en action, et des tableaux mixtes scènes + grille.</li>
+    <li><b>Navigation.</b> Dans la même étude, choisir la bonne page est plus difficile pour l'enfant que trouver l'image une fois dedans. Deux conséquences : limiter les niveaux cachés, et donner à chaque onglet <b>une vignette de la page elle-même</b> plutôt qu'un symbole isolé — c'était la navigation la plus exacte.</li>
+    <li><b>Recherche visuelle (Thiessen, Wilkinson et coll., repris par Light et coll., 2019).</b> Regrouper les images par couleur, ou les séparer par du blanc, accélère la recherche, y compris chez des enfants avec TSA. En revanche, un fond coloré n'accélère rien sur les petites grilles (12 à 16 images) et peut détourner l'attention de la partie utile de l'image : la couleur sert de repère, pas de décor.</li>
+    <li><b>Programmation « au moment où ça arrive ».</b> Les mêmes auteurs insistent sur la possibilité d'ajouter du vocabulaire pendant l'échange, sans préparation préalable.</li>
     <li><b>PODD</b> (Gayle Porter) : organisation pragmatique du vocabulaire. L'application s'inspire de ses principes sans reproduire un classeur PODD.</li>
     <li><b>Code couleur</b> inspiré de la clé de Fitzgerald modifiée : personnes jaune, actions vert, descriptions bleu, choses orange, petits mots violet, mots sociaux rose.</li>
   </ul>`;
@@ -1362,7 +1668,7 @@ function secSources(c){
 })();
 
 /* ---------- démarrage ---------- */
-registerCustom(); applySettings(); renderPage(); renderStrip();
+registerCustom(); registerScenes(); applySettings(); renderPage(); renderFixes(); renderStrip();
 </script>
 </body>
 </html>
